@@ -6,6 +6,56 @@ import defaults from './defaults';
 import { DefaultPresetList, type Preset } from '@/plugins/downloader/types';
 
 const migrations = {
+  '>=3.3.0'(store: Conf<Record<string, unknown>>) {
+    const lastfmConfig = store.get('plugins.lastfm') as {
+      enabled?: boolean;
+      token?: string;
+      session_key?: string;
+      api_root?: string;
+      api_key?: string;
+      secret?: string;
+    };
+    if (lastfmConfig) {
+      let scrobblerConfig = store.get(
+        'plugins.scrobbler',
+      ) as {
+        enabled?: boolean;
+        scrobblers?: {
+          lastfm?: {
+            enabled?: boolean;
+            token?: string;
+            sessionKey?: string;
+            apiRoot?: string;
+            apiKey?: string;
+            secret?: string;
+          };
+        };
+      } | undefined;
+
+      if (!scrobblerConfig) {
+        scrobblerConfig = {
+          enabled: lastfmConfig.enabled,
+        };
+      }
+
+      if (!scrobblerConfig.scrobblers) {
+        scrobblerConfig.scrobblers = {
+          lastfm: {},
+        };
+      }
+
+      scrobblerConfig.scrobblers.lastfm = {
+        enabled: lastfmConfig.enabled,
+        token: lastfmConfig.token,
+        sessionKey: lastfmConfig.session_key,
+        apiRoot: lastfmConfig.api_root,
+        apiKey: lastfmConfig.api_key,
+        secret: lastfmConfig.secret,
+      };
+      store.set('plugins.scrobbler', scrobblerConfig);
+      store.delete('plugins.lastfm');
+    }
+  },
   '>=3.0.0'(store: Conf<Record<string, unknown>>) {
     const discordConfig = store.get('plugins.discord') as Record<
       string,

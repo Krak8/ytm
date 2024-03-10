@@ -191,7 +191,11 @@
       "previous": "Precedente",
       "quit": "Esci",
       "restart": "Riavvia l'app",
-      "show": "Mostra finestra"
+      "show": "Mostra finestra",
+      "tooltip": {
+        "default": "YouTube Music",
+        "with-song-info": "YouTube Music: {{artist}} - {{title}}"
+      }
     }
   },
   "plugins": {
@@ -200,18 +204,26 @@
       "menu": {
         "blocker": "Blocco"
       },
-      "name": "Adblocker"
+      "name": "Ad blocker"
     },
     "album-actions": {
-      "description": "Aggiunge i pulsanti Undislike, Dislike, Like e Unlike a tutti i brani di una playlist o di un album.",
+      "description": "Aggiunge i pulsanti Undislike, Dislike, Like e Unlike a tutti i brani di una playlist o di un album",
       "name": "Azioni album"
     },
     "album-color-theme": {
       "description": "Applica un tema dinamico e degli effetti visivi basandosi sul colore dell'album",
+      "menu": {
+        "color-mix-ratio": {
+          "label": "Percentiuale colore",
+          "submenu": {
+            "percent": "{{ratio}}%"
+          }
+        }
+      },
       "name": "Tema abbinato a colore album"
     },
     "ambient-mode": {
-      "description": "Applica un effetto di illuminazione proiettando i colori delicati del video sullo sfondo dello schermo.",
+      "description": "Applica un effetto di illuminazione proiettando i colori delicati del video sullo sfondo dello schermo",
       "menu": {
         "blur-amount": {
           "label": "Intensità sfocatura",
@@ -413,10 +425,6 @@
       },
       "name": "Menu In-App"
     },
-    "last-fm": {
-      "description": "Aggiungi supporto per lo scrobbling su Last.fm",
-      "name": "Last.fm"
-    },
     "lumiastream": {
       "description": "Aggiungi supporto per Lumia Stream",
       "name": "Lumia Stream [Beta]"
@@ -468,6 +476,7 @@
         "disconnected": "Music Together disconnesso",
         "host-failed": "Impossibile ospitare Music Together",
         "id-copied": "L'ID dell Host è stato copiato negli appunti",
+        "id-copy-failed": "Impossibile copiare l'ID dell'host negli appunti",
         "join-failed": "Impossibile unirsi a Music Together",
         "joined": "Unito a Music Together",
         "permission-changed": "L'autorizzazione di Music Together è cambiata in {{permission}}",
@@ -568,8 +577,41 @@
       "description": "Permette di cambiare la qualità del video con un pulsante in sovrimpressione",
       "name": "Cambia qualità video"
     },
+    "scrobbler": {
+      "description": "Aggiunge il supporto per lo scrobbling (Last.fm, Listenbrainz ecc.)",
+      "dialog": {
+        "lastfm": {
+          "auth-failed": {
+            "message": "Impossibile autenticarsi con Last.fm\nNascondi il popup fino al prossimo riavvio.",
+            "title": "Autenticazione fallita"
+          }
+        }
+      },
+      "menu": {
+        "lastfm": {
+          "api-settings": "Impostazione Last.fm API"
+        },
+        "listenbrainz": {
+          "token": "Inserire il token utente per ListenBrainz"
+        },
+        "scrobble-other-media": "Scrobble altri media"
+      },
+      "name": "Scrobbler",
+      "prompt": {
+        "lastfm": {
+          "api-key": "API key per Last.fm",
+          "api-secret": "API secret per Last.fm"
+        },
+        "listenbrainz": {
+          "token": {
+            "label": "Inserisci il tuo token utente ListenBrainz:",
+            "title": "Token ListenBrainz"
+          }
+        }
+      }
+    },
     "shortcuts": {
-      "description": "Consente di impostare tasti di scelta rapida globali per la riproduzione (riproduci/pausa/successivo/precedente) + disabilita l'OSD multimediale sovrascrivendo i tasti multimediali + abilita Ctrl/CMD + F per la ricerca + abilita il supporto Linux MPRIS per i tasti multimediali + tasti di scelta rapida personalizzati per utenti avanzati.",
+      "description": "Consente di impostare tasti di scelta rapida globali per la riproduzione (riproduci/pausa/successivo/precedente) + disabilita l'OSD multimediale sovrascrivendo i tasti multimediali + abilita Ctrl/CMD + F per la ricerca + abilita il supporto Linux MPRIS per i tasti multimediali + tasti di scelta rapida personalizzati per utenti avanzati",
       "menu": {
         "override-media-keys": "Ridefinisci i tasti multimediali",
         "set-keybinds": "Imposta i controlli brano globali"

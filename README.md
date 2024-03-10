@@ -21,7 +21,7 @@
 	</a>
 </div>
 
-Read this in other languages: [🇰🇷](./docs/readme/README-ko.md)
+Read this in other languages: [🇰🇷](./docs/readme/README-ko.md), [🇮🇸](./docs/readme/README-is.md)
 
 **Electron wrapper around YouTube Music featuring:**
 
@@ -33,7 +33,7 @@ Read this in other languages: [🇰🇷](./docs/readme/README-ko.md)
 
 |                          Player Screen (album color theme & ambient light)                                |
 |:---------------------------------------------------------------------------------------------------------:|
-|![Screenshot2](https://github.com/th-ch/youtube-music/assets/16558115/28ed8f08-c8c4-48ad-811b-7722093e9d81)|
+|![Screenshot1](https://github.com/th-ch/youtube-music/assets/16558115/53efdf73-b8fa-4d7b-a235-b96b91ea77fc)|
 
 ## Translation
 
@@ -110,27 +110,29 @@ winget install th-ch.YouTubeMusic
 ## Available plugins:
 
 - **Ad Blocker**: Block all ads and tracking out of the box
+  
+- **Album Actions**: Adds Undislike, Dislike, Like, and Unlike buttons to apply this to all songs in a playlist or album
 
 - **Album Color Theme**: Applies a dynamic theme and visual effects based on the album color palette
 
-- **Ambient Mode**: Applies a lighting effect by casting gentle colors from the video, into your screen’s background.
+- **Ambient Mode**: Applies a lighting effect by casting gentle colors from the video, into your screen’s background
 
 - **Audio Compressor**: Apply compression to audio (lowers the volume of the loudest parts of the signal and raises the
   volume of the softest parts)
 
-- **Blur Nav Bar**: makes navigation bar transparent and blurry
+- **Blur Navigation Bar**: makes navigation bar transparent and blurry
 
-- **Bypass age restrictions**: bypass YouTube's age verification
+- **Bypass Age Restrictions**: bypass YouTube's age verification
 
-- **Captions selector**: Enable captions
+- **Captions Selector**: Enable captions
 
-- **Compact sidebar**: Always set the sidebar in compact mode
+- **Compact Sidebar**: Always set the sidebar in compact mode
 
 - **Crossfade**: Crossfade between songs
 
 - **Disable Autoplay**: Makes every song start in "paused" mode
 
-- [**Discord**](https://discord.com/): Show your friends what you listen to
+- **[Discord](https://discord.com/) Rich Presence**: Show your friends what you listen to
   with [Rich Presence](https://user-images.githubusercontent.com/28219076/104362104-a7a0b980-5513-11eb-9744-bb89eabe0016.png)
 
 - **Downloader**: downloads
@@ -138,18 +140,20 @@ winget install th-ch.YouTubeMusic
 
 - **Exponential Volume**: Makes the volume
   slider [exponential](https://greasyfork.org/en/scripts/397686-youtube-music-fix-volume-ratio/) so it's easier to
-  select lower volumes.
+  select lower volumes
 
 - **In-App Menu**: [gives bars a fancy, dark look](https://user-images.githubusercontent.com/78568641/112215894-923dbf00-8c29-11eb-95c3-3ce15db27eca.png)
 
   > (see [this post](https://github.com/th-ch/youtube-music/issues/410#issuecomment-952060709) if you have problem
   accessing the menu after enabling this plugin and hide-menu option)
 
-- [**Last.fm**](https://www.last.fm/): Scrobbles support
+- **Scrobbler**: Adds scrobbling support for [Last.fm](https://www.last.fm/) and [ListenBrainz](https://listenbrainz.org/)
 
 - **Lumia Stream**: Adds [Lumia Stream](https://lumiastream.com/) support
 
 - **Lyrics Genius**: Adds lyrics support for most songs
+
+- **Music Together**: Share a playlist with others. When the host plays a song, everyone else will hear the same song
 
 - **Navigation**: Next/Back navigation arrows directly integrated in the interface, like in your favorite browser
 
@@ -159,7 +163,7 @@ winget install th-ch.YouTubeMusic
   playing ([interactive notifications](https://user-images.githubusercontent.com/78568641/114102651-63ce0e00-98d0-11eb-9dfe-c5a02bb54f9c.png)
   are available on windows)
 
-- **Picture in picture**: allows to switch the app to picture-in-picture mode
+- **Picture-in-picture**: allows to switch the app to picture-in-picture mode
 
 - **Playback Speed**: Listen fast, listen
   slow! [Adds a slider that controls song speed](https://user-images.githubusercontent.com/61631665/129976003-e55db5ba-bf42-448c-a059-26a009775e68.png)
@@ -167,17 +171,15 @@ winget install th-ch.YouTubeMusic
 - **Precise Volume**: Control the volume precisely using mousewheel/hotkeys, with a custom hud and customizable volume
   steps
 
-- **Quality Changer**: Allows changing the video quality with
-  a [button](https://user-images.githubusercontent.com/78568641/138574366-70324a5e-2d64-4f6a-acdd-dc2a2b9cecc5.png) on
-  the video overlay
-
-- **Shortcuts**: Allows setting global hotkeys for playback (play/pause/next/previous) +
+- **Shortcuts (& MPRIS)**: Allows setting global hotkeys for playback (play/pause/next/previous) +
   disable [media osd](https://user-images.githubusercontent.com/84923831/128601225-afa38c1f-dea8-4209-9f72-0f84c1dd8b54.png)
   by overriding media keys + enable Ctrl/CMD + F to search + enable linux mpris support for
   mediakeys + [custom hotkeys](https://github.com/Araxeus/youtube-music/blob/1e591d6a3df98449bcda6e63baab249b28026148/providers/song-controls.js#L13-L50)
   for [advanced users](https://github.com/th-ch/youtube-music/issues/106#issuecomment-952156902)
 
-- **Skip-Silences** - Automatically skip silenced sections
+- **Skip Disliked Song**: Skips disliked songs
+
+- **Skip Silences**: Automatically skip silenced sections
 
 - [**SponsorBlock**](https://github.com/ajayyy/SponsorBlock): Automatically Skips non-music parts like intro/outro or
   parts of music videos where the song isn't playing
@@ -185,10 +187,14 @@ winget install th-ch.YouTubeMusic
 - **Taskbar Media Control**: Control playback from
   your [Windows taskbar](https://user-images.githubusercontent.com/78568641/111916130-24a35e80-8a82-11eb-80c8-5021c1aa27f4.png)
 
-- **Touchbar**: Custom TouchBar layout for macOS
+- **TouchBar**: Custom TouchBar layout for macOS
 
-- **Tuna-OBS**: Integration with [OBS](https://obsproject.com/)'s
+- **Tuna OBS**: Integration with [OBS](https://obsproject.com/)'s
   plugin [Tuna](https://obsproject.com/forum/resources/tuna.843/)
+
+- **Video Quality Changer**: Allows changing the video quality with
+  a [button](https://user-images.githubusercontent.com/78568641/138574366-70324a5e-2d64-4f6a-acdd-dc2a2b9cecc5.png) on
+  the video overlay
 
 - **Video Toggle**: Adds
   a [button](https://user-images.githubusercontent.com/28893833/173663950-63e6610e-a532-49b7-9afa-54cb57ddfc15.png) to
@@ -196,25 +202,29 @@ winget install th-ch.YouTubeMusic
 
 - **Visualizer**: Different music visualizers
 
-- These are the things you can do with websrv plugin.
+- **WebSrv**: Runs a webserver in the app. (used with combination with streamer bot check [here (Requires logging in to read.)](https://extensions.streamer.bot/t/youtube-music-integration-with-controls/777).)
 
-- Play Music 
+> - Play Music 
 you can add music to queue and/or force play the music immediately.
 `http://localhost:8888/play` & `http://localhost:8888/video` use following headers.
-
-  | **Header** | **Value** | **Description** |
-  | --- | --- | --- |
-  | **value** | song name | This header takes the name of the song as input an adds it to the queue |
-  | **force** | true/false | This header tells the YTMusic app to either add the song to the queue or forcefully play it immediately |
-- Fetch last added song 
-`http://localhost:8888/lastAdded` gives the name of the last added song.
-- Play / Pause Music
-`http://localhost:8888/playpause` allows you to toggle the state of music.
-- Play next song or previous song
-  1. `http://localhost:8888/playnext` allows you to skip to the next song.
-  2. `http://localhost:8888/playprevious` allows you to jump to the previous song.
-- Queue
-`http://localhost:8888/queue` gives you song queue list.
+> 
+>    >   | **Header** | **Value** | **Description** |
+>    >   | --- | --- | --- |
+>    >   | **name** | song name | This header takes the name of the song as input an adds it to the queue |
+>    >   | **force** | true/false | This header tells the YTMusic app to either add the song to the queue or forcefully play it immediately |
+> 
+> - Fetch last added song 
+> `http://localhost:8888/lastAdded` gives the name of the last added song.
+>
+> - Play / Pause Music
+> `http://localhost:8888/playpause` allows you to toggle the state of music.
+> 
+> - Play next song or previous song
+>   1. `http://localhost:8888/playnext` allows you to skip to the next song.
+>   2. `http://localhost:8888/playprevious` allows you to jump to the previous song.
+> 
+>  - Queue
+>  `http://localhost:8888/queue` gives you song queue list.
 
 ## Themes
 

@@ -8,7 +8,8 @@
         "load-all": "Načítání všech pluginů",
         "load-failed": "Selhalo načtení \"{{pluginName}}\" pluginu",
         "loaded": "Plugin \"{{pluginName}}\" načten",
-        "unload-failed": "Selhalo unload \"{{pluginName}}\" pluginu"
+        "unload-failed": "Selhalo unload \"{{pluginName}}\" pluginu",
+        "unloaded": "Plugin {{pluginName}} byl odnačten"
       }
     }
   },
@@ -406,10 +407,6 @@
       "menu": {
         "hide-dom-window-controls": "Skrýt DOM window controls"
       }
-    },
-    "last-fm": {
-      "description": "Přidat scrobbling podporu pro Last.fm",
-      "name": "Last.fm"
     },
     "lumiastream": {
       "description": "Přidává Lumia Stream podporu",

@@ -15,6 +15,8 @@ import { loadI18n, setLanguage, t as i18t } from '@/i18n';
 
 import type { PluginConfig } from '@/types/plugins';
 import type { YoutubePlayer } from '@/types/youtube-player';
+import type { QueueElement } from '@/types/queue';
+import type { QueueResponse } from '@/types/youtube-music-desktop-internal';
 
 let api: (Element & YoutubePlayer) | null = null;
 let isPluginLoaded = false;
@@ -37,8 +39,79 @@ interface YouTubeMusicAppElement extends HTMLElement {
 }
 
 async function onApiLoaded() {
+  window.ipcRenderer.on('ytmd:previous-video', () => {
+    document.querySelector<HTMLElement>('.previous-button.ytmusic-player-bar')?.click();
+  });
+  window.ipcRenderer.on('ytmd:next-video', () => {
+    document.querySelector<HTMLElement>('.next-button.ytmusic-player-bar')?.click();
+  });
+  window.ipcRenderer.on('ytmd:toggle-play', (_) => {
+    if (api?.getPlayerState() === 2) api?.playVideo();
+    else api?.pauseVideo();
+  });
   window.ipcRenderer.on('ytmd:seek-to', (_, t: number) => api!.seekTo(t));
   window.ipcRenderer.on('ytmd:seek-by', (_, t: number) => api!.seekBy(t));
+  window.ipcRenderer.on('ytmd:shuffle', () => {
+    document.querySelector<HTMLElement & { queue: { shuffle: () => void } }>('ytmusic-player-bar')?.queue.shuffle();
+  });
+  window.ipcRenderer.on('ytmd:update-like', (_, status: 'LIKE' | 'DISLIKE' = 'LIKE') => {
+    document.querySelector<HTMLElement & { updateLikeStatus: (status: string) => void }>('#like-button-renderer')?.updateLikeStatus(status);
+  });
+  window.ipcRenderer.on('ytmd:switch-repeat', (_, repeat = 1) => {
+    for (let i = 0; i < repeat; i++) {
+      document.querySelector<HTMLElement & { onRepeatButtonTap: () => void }>('ytmusic-player-bar')?.onRepeatButtonTap();
+    }
+  });
+  window.ipcRenderer.on('ytmd:update-volume', (_, volume: number) => {
+    document
+      .querySelector<
+        HTMLElement & { updateVolume: (volume: number) => void }
+      >('ytmusic-player-bar')
+      ?.updateVolume(volume);
+  });
+
+  const isFullscreen = () => {
+    const isFullscreen =
+      document
+        .querySelector<HTMLElement>('ytmusic-player-bar')
+        ?.attributes.getNamedItem('player-fullscreened') ?? null;
+
+    return isFullscreen !== null;
+  };
+
+  const clickFullscreenButton = (isFullscreenValue: boolean) => {
+    const fullscreen = isFullscreen();
+    if (isFullscreenValue === fullscreen) {
+      return;
+    }
+
+    if (fullscreen) {
+      document.querySelector<HTMLElement>('.exit-fullscreen-button')?.click();
+    } else {
+      document.querySelector<HTMLElement>('.fullscreen-button')?.click();
+    }
+  };
+
+  window.ipcRenderer.on('ytmd:get-fullscreen', (event) => {
+    event.sender.send('ytmd:set-fullscreen', isFullscreen());
+  });
+
+  window.ipcRenderer.on('ytmd:click-fullscreen-button', (_, fullscreen: boolean | undefined) => {
+    clickFullscreenButton(fullscreen ?? false);
+  });
+
+  window.ipcRenderer.on('ytmd:toggle-mute', (_) => {
+    document.querySelector<HTMLElement & { onVolumeTap: () => void }>('ytmusic-player-bar')?.onVolumeTap();
+  });
+
+  window.ipcRenderer.on('ytmd:get-queue', (event) => {
+    const queue = document.querySelector<QueueElement>('#queue');
+    event.sender.send('ytmd:get-queue-response', {
+      items: queue?.queue.getItems(),
+      autoPlaying: queue?.queue.autoPlaying,
+      continuation: queue?.queue.continuation,
+    } satisfies QueueResponse);
+  });
 
   const video = document.querySelector('video')!;
   const audioContext = new AudioContext();
@@ -203,7 +276,9 @@ const initObserver = async () => {
   // check document.documentElement is ready
   await new Promise<void>((resolve) => {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+      document.addEventListener('DOMContentLoaded', () => resolve(), {
+        once: true,
+      });
     } else {
       resolve();
     }

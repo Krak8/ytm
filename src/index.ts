@@ -53,7 +53,16 @@ import {
 import { LoggerPrefix } from '@/utils';
 import { loadI18n, setLanguage, t } from '@/i18n';
 
+import ErrorHtmlAsset from '@assets/error.html?asset';
+
 import type { PluginConfig } from '@/types/plugins';
+
+if (!is.macOS()) {
+  delete allPlugins['touchbar'];
+}
+if (!is.windows()) {
+  delete allPlugins['taskbar-mediacontrol'];
+}
 
 // Catch errors and log them
 unhandled({
@@ -258,7 +267,7 @@ async function createMainWindow() {
   const windowPosition: Electron.Point = config.get('window-position');
   const useInlineMenu = config.plugins.isEnabled('in-app-menu');
 
-  const defaultTitleBarOverlayOptions: Electron.TitleBarOverlayOptions = {
+  const defaultTitleBarOverlayOptions: Electron.TitleBarOverlay = {
     color: '#00000000',
     symbolColor: '#ffffff',
     height: 32,
@@ -413,6 +422,18 @@ async function createMainWindow() {
       });
     }
   });
+  win.webContents.on('will-redirect', (event) => {
+    const url = new URL(event.url);
+
+    // Workarounds for regions where YTM is restricted
+    if (url.hostname.endsWith('youtube.com') && url.pathname === '/premium') {
+      event.preventDefault();
+
+      win.webContents.loadURL(
+        'https://accounts.google.com/ServiceLogin?ltmpl=music&service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26next%3Dhttps%253A%252F%252Fmusic.youtube.com%252F'
+      );
+    }
+  });
 
   win.webContents.loadURL(urlToLoad);
 
@@ -486,7 +507,7 @@ app.once('browser-window-created', (_event, win) => {
       if (errorCode !== -3) {
         // -3 is a false positive
         win.webContents.send('log', log);
-        win.webContents.loadFile(path.join(__dirname, 'error.html'));
+        win.webContents.loadFile(ErrorHtmlAsset);
       }
     },
   );
@@ -567,7 +588,7 @@ app.whenReady().then(async () => {
       );
       try {
         // Check if shortcut is registered and valid
-        const shortcutDetails = shell.readShortcutLink(shortcutPath); // Throw error if doesn't exist yet
+        const shortcutDetails = shell.readShortcutLink(shortcutPath); // Throw error if it doesn't exist yet
         if (
           shortcutDetails.target !== appLocation ||
           shortcutDetails.appUserModelId !== appID
@@ -652,7 +673,9 @@ app.whenReady().then(async () => {
         );
       }
 
-      handleProtocol(command);
+      const splited = decodeURIComponent(command).split(' ');
+
+      handleProtocol(splited.shift()!, splited);
       return;
     }
 

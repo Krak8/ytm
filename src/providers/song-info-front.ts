@@ -10,10 +10,7 @@ import type { VideoDataChanged } from '@/types/video-data-changed';
 let songInfo: SongInfo = {} as SongInfo;
 export const getSongInfo = () => songInfo;
 
-const $ = <E extends Element = Element>(s: string): E | null =>
-  document.querySelector<E>(s);
-
-window.ipcRenderer.on('update-song-info', (_, extractedSongInfo: SongInfo) => {
+window.ipcRenderer.on('ytmd:update-song-info', (_, extractedSongInfo: SongInfo) => {
   songInfo = extractedSongInfo;
 });
 
@@ -21,7 +18,7 @@ window.ipcRenderer.on('update-song-info', (_, extractedSongInfo: SongInfo) => {
 const srcChangedEvent = new CustomEvent('ytmd:src-changed');
 
 export const setupSeekedListener = singleton(() => {
-  $('video')?.addEventListener('seeked', (v) => {
+  document.querySelector('video')?.addEventListener('seeked', (v) => {
     if (v.target instanceof HTMLVideoElement) {
       window.ipcRenderer.send('ytmd:seeked', v.target.currentTime);
     }
@@ -32,11 +29,12 @@ export const setupTimeChangedListener = singleton(() => {
   const progressObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       const target = mutation.target as Node & { value: string };
-      window.ipcRenderer.send('ytmd:time-changed', target.value);
-      songInfo.elapsedSeconds = Number(target.value);
+      const numberValue = Number(target.value);
+      window.ipcRenderer.send('ytmd:time-changed', numberValue);
+      songInfo.elapsedSeconds = numberValue;
     }
   });
-  const progressBar = $('#progress-bar');
+  const progressBar = document.querySelector('#progress-bar');
   if (progressBar) {
     progressObserver.observe(progressBar, { attributeFilter: ['value'] });
   }
@@ -56,7 +54,7 @@ export const setupRepeatChangedListener = singleton(() => {
       ).__dataHost.getState().queue.repeatMode,
     );
   });
-  repeatObserver.observe($('#right-controls .repeat')!, {
+  repeatObserver.observe(document.querySelector('#right-controls .repeat')!, {
     attributeFilter: ['title'],
   });
 
@@ -64,20 +62,62 @@ export const setupRepeatChangedListener = singleton(() => {
   // provided by YouTube Music
   window.ipcRenderer.send(
     'ytmd:repeat-changed',
-    $<
-      HTMLElement & {
-        getState: () => GetState;
-      }
-    >('ytmusic-player-bar')?.getState().queue.repeatMode,
+    document
+      .querySelector<
+        HTMLElement & {
+          getState: () => GetState;
+        }
+      >('ytmusic-player-bar')
+      ?.getState().queue.repeatMode,
   );
 });
 
 export const setupVolumeChangedListener = singleton((api: YoutubePlayer) => {
-  $('video')?.addEventListener('volumechange', () => {
+  document.querySelector('video')?.addEventListener('volumechange', () => {
     window.ipcRenderer.send('ytmd:volume-changed', api.getVolume());
   });
   // Emit the initial value as well; as it's persistent between launches.
   window.ipcRenderer.send('ytmd:volume-changed', api.getVolume());
+});
+
+export const setupFullScreenChangedListener = singleton(() => {
+  const playerBar = document.querySelector('ytmusic-player-bar');
+
+  if (!playerBar) {
+    window.ipcRenderer.send('ytmd:fullscreen-changed-supported', false);
+    return;
+  }
+
+  const observer = new MutationObserver(() => {
+    window.ipcRenderer.send(
+      'ytmd:fullscreen-changed',
+      (
+        playerBar?.attributes.getNamedItem('player-fullscreened') ?? null
+      ) !== null,
+    );
+  });
+
+  observer.observe(playerBar, {
+    attributes: true,
+    childList: false,
+    subtree: false,
+  });
+});
+
+export const setupAutoPlayChangedListener = singleton(() => {
+  const autoplaySlider = document.querySelector<HTMLInputElement>(
+    '.autoplay > tp-yt-paper-toggle-button',
+  );
+
+  const observer = new MutationObserver(() => {
+    window.ipcRenderer.send('ytmd:autoplay-changed');
+  });
+
+  observer.observe(autoplaySlider!, {
+    attributes: true,
+    childList: false,
+    subtree: false,
+  });
 });
 
 export default (api: YoutubePlayer) => {
@@ -91,6 +131,14 @@ export default (api: YoutubePlayer) => {
 
   window.ipcRenderer.on('ytmd:setup-volume-changed-listener', () => {
     setupVolumeChangedListener(api);
+  });
+
+  window.ipcRenderer.on('ytmd:setup-fullscreen-changed-listener', () => {
+    setupFullScreenChangedListener();
+  });
+
+  window.ipcRenderer.on('ytmd:setup-autoplay-changed-listener', () => {
+    setupAutoPlayChangedListener();
   });
 
   window.ipcRenderer.on('ytmd:setup-seeked-listener', () => {
@@ -134,7 +182,7 @@ export default (api: YoutubePlayer) => {
       waitingEvent.delete(videoData.videoId);
       sendSongInfo(videoData);
     } else if (name === 'dataloaded') {
-      const video = $<HTMLVideoElement>('video');
+      const video = document.querySelector<HTMLVideoElement>('video');
       video?.dispatchEvent(srcChangedEvent);
 
       for (const status of ['playing', 'pause'] as const) {
@@ -146,29 +194,26 @@ export default (api: YoutubePlayer) => {
     }
   });
 
-  const video = $('video')!;
-  for (const status of ['playing', 'pause'] as const) {
-    video.addEventListener(status, playPausedHandlers[status]);
+  const video = document.querySelector('video');
+
+  if (video) {
+    for (const status of ['playing', 'pause'] as const) {
+      video.addEventListener(status, playPausedHandlers[status]);
+    }
   }
 
   function sendSongInfo(videoData: VideoDataChangeValue) {
     const data = api.getPlayerResponse();
 
-    data.videoDetails.album =
-      (
-        Object.entries(videoData)
-          .find(([, value]) => value && Object.hasOwn(value, 'playerOverlays')) as [string, AlbumDetails | undefined]
-      )?.[1]?.playerOverlays?.playerOverlayRenderer?.browserMediaSession?.browserMediaSessionRenderer?.album?.runs?.at(
-        0,
-      )?.text;
+    data.videoDetails.album = (
+      Object.entries(videoData).find(
+        ([, value]) => value && Object.hasOwn(value, 'playerOverlays'),
+      ) as [string, AlbumDetails | undefined]
+    )?.[1]?.playerOverlays?.playerOverlayRenderer?.browserMediaSession?.browserMediaSessionRenderer?.album?.runs?.at(
+      0,
+    )?.text;
     data.videoDetails.elapsedSeconds = 0;
     data.videoDetails.isPaused = false;
-
-    // HACK: This is a workaround for "podcast" type video. GREAT JOB GOOGLE.
-    if (data.playabilityStatus.transportControlsConfig) {
-      data.videoDetails.author =
-        data.microformat.microformatDataRenderer.pageOwnerDetails.name;
-    }
 
     window.ipcRenderer.send('ytmd:video-src-changed', data);
   }

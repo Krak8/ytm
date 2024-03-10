@@ -1,70 +1,82 @@
 // This is used for to control the songs
 import { BrowserWindow } from 'electron';
 
-type Modifiers = (
-  | Electron.MouseInputEvent
-  | Electron.MouseWheelInputEvent
-  | Electron.KeyboardInputEvent
-)['modifiers'];
-export const pressKey = (
-  window: BrowserWindow,
-  key: string,
-  modifiers: Modifiers = [],
-) => {
-  window.webContents.sendInputEvent({
-    type: 'keyDown',
-    modifiers,
-    keyCode: key,
-  });
+// see protocol-handler.ts
+type ArgsType<T> = T | string[] | undefined;
+
+const parseNumberFromArgsType = (args: ArgsType<number>) => {
+  if (typeof args === 'number') {
+    return args;
+  } else if (Array.isArray(args)) {
+    return Number(args[0]);
+  } else {
+    return null;
+  }
+};
+
+const parseBooleanFromArgsType = (args: ArgsType<boolean>) => {
+  if (typeof args === 'boolean') {
+    return args;
+  } else if (Array.isArray(args)) {
+    return args[0] === 'true';
+  } else {
+    return null;
+  }
 };
 
 export default (win: BrowserWindow) => {
-  const commands = {
+  return {
     // Playback
-    previous: () => pressKey(win, 'k'),
-    next: () => pressKey(win, 'j'),
-    playPause: () => pressKey(win, ';'),
-    like: () => pressKey(win, '+'),
-    dislike: () => pressKey(win, '_'),
-    go10sBack: () => pressKey(win, 'h'),
-    go10sForward: () => pressKey(win, 'l'),
-    go1sBack: () => pressKey(win, 'h', ['shift']),
-    go1sForward: () => pressKey(win, 'l', ['shift']),
-    shuffle: () => pressKey(win, 's'),
-    switchRepeat(n = 1) {
-      for (let i = 0; i < n; i++) {
-        pressKey(win, 'r');
+    previous: () => win.webContents.send('ytmd:previous-video'),
+    next: () => win.webContents.send('ytmd:next-video'),
+    playPause: () => win.webContents.send('ytmd:toggle-play'),
+    like: () => win.webContents.send('ytmd:update-like', 'LIKE'),
+    dislike: () => win.webContents.send('ytmd:update-like', 'DISLIKE'),
+    goBack: (seconds: ArgsType<number>) => {
+      const secondsNumber = parseNumberFromArgsType(seconds);
+      if (secondsNumber !== null) {
+        win.webContents.send('ytmd:seek-by', -secondsNumber);
+      }
+    },
+    goForward: (seconds: ArgsType<number>) => {
+      const secondsNumber = parseNumberFromArgsType(seconds);
+      if (secondsNumber !== null) {
+        win.webContents.send('ytmd:seek-by', seconds);
+      }
+    },
+    shuffle: () => win.webContents.send('ytmd:shuffle'),
+    switchRepeat: (n: ArgsType<number> = 1) => {
+      const repeat = parseNumberFromArgsType(n);
+      if (repeat !== null) {
+        win.webContents.send('ytmd:switch-repeat', n);
       }
     },
     // General
-    volumeMinus10: () => pressKey(win, '-'),
-    volumePlus10: () => pressKey(win, '='),
-    fullscreen: () => pressKey(win, 'f'),
-    muteUnmute: () => pressKey(win, 'm'),
-    maximizeMinimisePlayer: () => pressKey(win, 'q'),
-    // Navigation
-    goToHome() {
-      pressKey(win, 'g');
-      pressKey(win, 'h');
+    setVolume: (volume: ArgsType<number>) => {
+      const volumeNumber = parseNumberFromArgsType(volume);
+      if (volumeNumber !== null) {
+        win.webContents.send('ytmd:update-volume', volume);
+      }
     },
-    goToLibrary() {
-      pressKey(win, 'g');
-      pressKey(win, 'l');
+    setFullscreen: (isFullscreen: ArgsType<boolean>) => {
+      const isFullscreenValue = parseBooleanFromArgsType(isFullscreen);
+      if (isFullscreenValue !== null) {
+        win.setFullScreen(isFullscreenValue);
+        win.webContents.send('ytmd:click-fullscreen-button', isFullscreenValue);
+      }
     },
-    goToSettings() {
-      pressKey(win, 'g');
-      pressKey(win, ',');
+    requestFullscreenInformation: () => {
+      win.webContents.send('ytmd:get-fullscreen');
     },
-    goToExplore() {
-      pressKey(win, 'g');
-      pressKey(win, 'e');
+    requestQueueInformation: () => {
+      win.webContents.send('ytmd:get-queue');
     },
-    search: () => pressKey(win, '/'),
-    showShortcuts: () => pressKey(win, '/', ['shift']),
-  };
-  return {
-    ...commands,
-    play: commands.playPause,
-    pause: commands.playPause,
+    muteUnmute: () => win.webContents.send('ytmd:toggle-mute'),
+    search: () => {
+      win.webContents.sendInputEvent({
+        type: 'keyDown',
+        keyCode: '/',
+      });
+    },
   };
 };
