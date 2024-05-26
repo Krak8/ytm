@@ -4,9 +4,20 @@
 }
 
 /* youtube-music style */
-
 ytmusic-app-layout {
+  overflow: scroll;
+  height: calc(100vh - var(--menu-bar-height, 36px));
   margin-top: var(--menu-bar-height, 36px) !important;
+}
+ytmusic-app-layout#layout {
+  --ytmusic-nav-bar-offset: 0px;
+}
+
+ytmusic-app-layout::-webkit-scrollbar{
+  width: var(--ytmusic-scrollbar-width);
+}
+ytmusic-app-layout::-webkit-scrollbar-thumb{
+  background-color: rgb(126, 126, 126);
 }
 
 ytmusic-app-layout > [slot='nav-bar'],
@@ -50,6 +61,11 @@ ytmusic-guide-renderer {
   height: calc(
     100vh - var(--menu-bar-height) - var(--ytmusic-nav-bar-height)
   ) !important;
+}
+
+/* fix mini player behavior */
+ytmusic-app-layout ytmusic-player-page[is-mweb-modernization-enabled] .side-panel.ytmusic-player-page {
+  transform: translate(0, calc(var(--ytmusic-player-page-inner-height) - var(--ytmusic-player-page-tabs-header-height) - var(--ytmusic-player-page-player-bar-height) - var(--menu-bar-height, 32px) ));
 }
 
 /* ytm-bugs: see https://github.com/th-ch/youtube-music/issues/1737 */
