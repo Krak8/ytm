@@ -21,7 +21,7 @@
 	</a>
 </div>
 
-Read this in other languages: [🇰🇷](./docs/readme/README-ko.md), [🇮🇸](./docs/readme/README-is.md)
+Read this in other languages: [🇰🇷](./docs/readme/README-ko.md), [🇮🇸](./docs/readme/README-is.md), [🇨🇱 🇪🇸](./docs/readme/README-es.md)
 
 **Electron wrapper around YouTube Music featuring:**
 
@@ -226,6 +226,69 @@ you can add music to queue and/or force play the music immediately.
 >  - Queue
 >  `http://localhost:8888/queue` gives you song queue list.
 
+
+You can help with translation on [Hosted Weblate](https://hosted.weblate.org/projects/youtube-music/).
+
+<a href="https://hosted.weblate.org/engage/youtube-music/">
+  <img src="https://hosted.weblate.org/widget/youtube-music/i18n/multi-auto.svg" alt="translation status" />
+  <img src="https://hosted.weblate.org/widget/youtube-music/i18n/287x66-black.png" alt="translation status 2" />
+</a>
+
+## Download
+
+You can check out the [latest release](https://github.com/th-ch/youtube-music/releases/latest) to quickly find the
+latest version.
+
+### Arch Linux
+
+Install the [`youtube-music-bin`](https://aur.archlinux.org/packages/youtube-music-bin) package from the AUR. For AUR installation instructions, take a look at
+this [wiki page](https://wiki.archlinux.org/index.php/Arch_User_Repository#Installing_packages).
+
+### macOS
+
+You can install the app using Homebrew (see the [cask definition](https://github.com/th-ch/homebrew-youtube-music)):
+
+```bash
+brew install th-ch/youtube-music/youtube-music
+```
+
+If you install the app manually and get an error "is damaged and can’t be opened." when launching the app, run the following in the Terminal:
+
+```bash
+xattr -cr /Applications/YouTube\ Music.app
+```
+
+### Windows
+
+You can use the [Scoop package manager](https://scoop.sh) to install the `youtube-music` package from
+the [`extras` bucket](https://github.com/ScoopInstaller/Extras).
+
+```bash
+scoop bucket add extras
+scoop install extras/youtube-music
+```
+
+Alternately you can use [Winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/), Windows 11s
+official CLI package manager to install the `th-ch.YouTubeMusic` package.
+
+*Note: Microsoft Defender SmartScreen might block the installation since it is from an "unknown publisher". This is also
+true for the manual installation when trying to run the executable(.exe) after a manual download here on github (same
+file).*
+
+```bash
+winget install th-ch.YouTubeMusic
+```
+
+#### How to install without a network connection? (in Windows)
+
+- Download the `*.nsis.7z` file for _your device architecture_ in [release page](https://github.com/th-ch/youtube-music/releases/latest).
+  - `x64` for 64-bit Windows
+  - `ia32` for 32-bit Windows
+  - `arm64` for ARM64 Windows
+- Download installer in release page. (`*-Setup.exe`)
+- Place them in the **same directory**.
+- Run the installer.
+
 ## Themes
 
 You can load CSS files to change the look of the application (Options > Visual Tweaks > Themes).
@@ -368,8 +431,11 @@ export default createPlugin({
 4. Run `pnpm build:OS`
 
 - `pnpm dist:win` - Windows
-- `pnpm dist:linux` - Linux
-- `pnpm dist:mac` - MacOS
+- `pnpm dist:linux` - Linux (amd64)
+- `pnpm dist:linux:deb-arm64` - Linux (arm64 for Debian)
+- `pnpm dist:linux:rpm-arm64` - Linux (arm64 for Fedora)
+- `pnpm dist:mac` - macOS (amd64)
+- `pnpm dist:mac:arm64` - macOS (arm64)
 
 Builds the app for macOS, Linux, and Windows,
 using [electron-builder](https://github.com/electron-userland/electron-builder).
