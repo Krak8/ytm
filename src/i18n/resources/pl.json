@@ -207,6 +207,10 @@
     }
   },
   "plugins": {
+    "ad-speedup": {
+      "description": "Wycisza reklamę i przyśpiesza do 16x",
+      "name": "Przyśpieszacz reklam"
+    },
     "adblocker": {
       "description": "Blokuj wszystkie reklamy i śledzenie",
       "menu": {
@@ -274,6 +278,56 @@
         }
       },
       "name": "Tryb otoczenia"
+    },
+    "amuse": {
+      "description": "Wspiera integrację YouTube Music z widgetami Amuse (od 6K Labs)",
+      "name": "Amuse",
+      "response": {
+        "query": "Serwer API Amuse działa. Użyj metody GET do /query, aby zdobyć informację o utworze."
+      }
+    },
+    "api-server": {
+      "description": "Pozwala na kontrolowanie YouTube Music poprzez podłączenie specjalnego serwera API",
+      "dialog": {
+        "request": {
+          "buttons": {
+            "allow": "Zezwól",
+            "deny": "Odmów"
+          },
+          "message": "Zezwolić {{ID}} (pochodzenie: {{origin}}) na dostęp do API?",
+          "title": "Prośba o autoryzację API"
+        }
+      },
+      "menu": {
+        "auth-strategy": {
+          "label": "Strategia autoryzacji",
+          "submenu": {
+            "auth-at-first": {
+              "label": "Autoryzuj przy pierwszej prośbie"
+            },
+            "none": {
+              "label": "Nie autoryzuj"
+            }
+          }
+        },
+        "hostname": {
+          "label": "Nazwa hosta (IP)"
+        },
+        "port": {
+          "label": "Port"
+        }
+      },
+      "name": "YouTube Music API",
+      "prompt": {
+        "hostname": {
+          "label": "Wpisz nazwę hosta (IP, np. 0.0.0.0), który będzie użyty do serwera API:",
+          "title": "Nazwa hosta"
+        },
+        "port": {
+          "label": "Wpisz port, z którego będzie korzystać serwer API:",
+          "title": "Port"
+        }
+      }
     },
     "audio-compressor": {
       "description": "Zastosuj kompresję do dźwięku (obniża głośność najgłośniejszych części sygnału i zwiększa głośność najcichszych części)",
@@ -410,6 +464,21 @@
       "description": "Pobiera MP3/ źródło audio bezpośrednio z interfejsu",
       "menu": {
         "choose-download-folder": "Wybierz folder pobierania",
+        "download-finish-settings": {
+          "label": "Pobierz po zakończeniu",
+          "prompt": {
+            "last-percent": "Po x procentach",
+            "last-seconds": "Ostatnie x sekund",
+            "title": "Konfiguruj, kiedy pobierać"
+          },
+          "submenu": {
+            "advanced": "Zaawansowane",
+            "enabled": "Włączone",
+            "mode": "Tryb czasowy",
+            "percent": "Procenty",
+            "seconds": "Sekundy"
+          }
+        },
         "download-playlist": "Pobierz playlistę",
         "presets": "Predefiniowane ustawienia",
         "skip-existing": "Pomiń istniejące pliki"
@@ -421,6 +490,18 @@
       "templates": {
         "button": "Pobierz"
       }
+    },
+    "equalizer": {
+      "description": "Dodaje equalizer do odtwarzacza",
+      "menu": {
+        "presets": {
+          "label": "Presety",
+          "list": {
+            "bass-booster": "Wzmacniacz basu"
+          }
+        }
+      },
+      "name": "Korektor"
     },
     "exponential-volume": {
       "description": "Sprawia, że suwak głośności jest proporcjonalna, dzięki czemu łatwiej jest wybrać niższą głośność.",
@@ -648,6 +729,63 @@
     "sponsorblock": {
       "description": "Automatycznie pomija fragmenty niebędące muzyką, takie jak wstęp/zakończenie lub fragmenty teledysków, w których utwór nie jest odtwarzany",
       "name": "Pomiń nieistotne fragmenty"
+    },
+    "synced-lyrics": {
+      "description": "Dodaje zsynchronizowane napisy do utworów używając między innymi LRClib.",
+      "errors": {
+        "fetch": "⚠️\tWystąpił błąd podczas pobierania tekstu utworu.\n\tSpróbuj ponownie później.",
+        "not-found": "⚠️ Nie znaleziono napisów dla tego utworu."
+      },
+      "menu": {
+        "default-text-string": {
+          "label": "Standardowy znak luki",
+          "tooltip": "Wybierz domyślny znak, który ma być wyświetlany jako pauza między słowami"
+        },
+        "line-effect": {
+          "label": "Efekty linijki",
+          "submenu": {
+            "fancy": {
+              "label": "Facy",
+              "tooltip": "Użyj specjalnych efektów w stylu aplikacji na obecną linię"
+            },
+            "focus": {
+              "label": "Fokus",
+              "tooltip": "Spraw, aby tylko obecna linijka była biała"
+            },
+            "offset": {
+              "label": "Przesunięcie",
+              "tooltip": "Przesuń w prawo obecną linijkę"
+            },
+            "scale": {
+              "label": "Skala",
+              "tooltip": "Zmień skalę aktualnej linijki"
+            }
+          },
+          "tooltip": "Wybierz efekt, by zastosować go do aktualnej linijki"
+        },
+        "precise-timing": {
+          "label": "Zsynchronizuj tekst utworu do perfekcji",
+          "tooltip": "Wylicz czas wyświetlania następnej linijki co do milisekundy (może mieć mały wpływ na wydajność systemu)"
+        },
+        "show-lyrics-even-if-inexact": {
+          "label": "Pokaż teksty, mimo niezgodności",
+          "tooltip": "Jeżeli nie znaleziono tekstu piosenki z bazy danych, wtyczka spróbuje ponownie przez wyszukanie przybliżonej frazy.\nNależy jednak pamiętać, że następne próby mogą nie być trafne co do oryginału."
+        },
+        "show-time-codes": {
+          "label": "Pokaż znaczniki czasu",
+          "tooltip": "Pokaż znaczniki czasu obok linijek"
+        }
+      },
+      "name": "Napisy zsynchronizowane",
+      "refetch-btn": {
+        "fetching": "Pobieranie napisów...",
+        "normal": "Odśwież napisy"
+      },
+      "warnings": {
+        "duration-mismatch": "⚠️ - Napisy mogą nie być zsynchronizowane z powodu różnicy w czasie trwania utworu.",
+        "inexact": "⚠️ - Tekst utworu może się różnić od oryginału",
+        "instrumental": "⚠️ - To jest utwór instrumentalny"
+      }
     },
     "taskbar-mediacontrol": {
       "description": "Steruj odtwarzaniem z paska zadań systemu Windows",

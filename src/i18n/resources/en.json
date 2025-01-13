@@ -158,18 +158,18 @@
               },
               "remove-upgrade-button": "Remove upgrade button",
               "theme": {
+                "dialog": {
+                  "button": {
+                    "cancel": "Cancel",
+                    "remove": "Remove"
+                  },
+                  "remove-theme": "Are you sure you want to remove the custom theme?",
+                  "remove-theme-message": "This will remove the custom theme"
+                },
                 "label": "Theme",
                 "submenu": {
                   "import-css-file": "Import custom CSS file",
                   "no-theme": "No theme"
-                },
-                "dialog": {
-                  "remove-theme": "Are you sure you want to remove the custom theme?",
-                  "remove-theme-message": "This will remove the custom theme",
-                  "button": {
-                    "cancel": "Cancel",
-                    "remove": "Remove"
-                  }
                 }
               }
             }
@@ -207,6 +207,10 @@
     }
   },
   "plugins": {
+    "ad-speedup": {
+      "description": "If an ad play it mutes the audio and sets playback speed to 16x",
+      "name": "Ad Speedup"
+    },
     "adblocker": {
       "description": "Block all ads and tracking out of the box",
       "menu": {
@@ -220,7 +224,6 @@
     },
     "album-color-theme": {
       "description": "Applies a dynamic theme and visual effects based on the album color palette",
-      "name": "Album Color Theme",
       "menu": {
         "color-mix-ratio": {
           "label": "Color mix ratio",
@@ -228,7 +231,8 @@
             "percent": "{{ratio}}%"
           }
         }
-      }
+      },
+      "name": "Album Color Theme"
     },
     "ambient-mode": {
       "description": "Applies a lighting effect by casting gentle colors from the video, into your screen’s background",
@@ -274,6 +278,56 @@
         }
       },
       "name": "Ambient Mode"
+    },
+    "amuse": {
+      "description": "Adds YouTube Music support for the Amuse now playing widget by 6K Labs",
+      "name": "Amuse",
+      "response": {
+        "query": "Amuse API server is running. GET /query to get song info."
+      }
+    },
+    "api-server": {
+      "description": "Adds an API server to control the player",
+      "dialog": {
+        "request": {
+          "buttons": {
+            "allow": "Allow",
+            "deny": "Deny"
+          },
+          "message": "Allow {{ID}} ({{origin}}) to access the API?",
+          "title": "API authorization request"
+        }
+      },
+      "menu": {
+        "auth-strategy": {
+          "label": "Authorization strategy",
+          "submenu": {
+            "auth-at-first": {
+              "label": "Authorize at first request"
+            },
+            "none": {
+              "label": "No authorization"
+            }
+          }
+        },
+        "hostname": {
+          "label": "Hostname"
+        },
+        "port": {
+          "label": "Port"
+        }
+      },
+      "name": "API Server [Beta]",
+      "prompt": {
+        "hostname": {
+          "label": "Enter the hostname (like 0.0.0.0) for the API server:",
+          "title": "Hostname"
+        },
+        "port": {
+          "label": "Enter the port for the API server:",
+          "title": "Port"
+        }
+      }
     },
     "audio-compressor": {
       "description": "Apply compression to audio (lowers the volume of the loudest parts of the signal and raises the volume of the softest parts)",
@@ -410,6 +464,21 @@
       "description": "Downloads MP3 / source audio directly from the interface",
       "menu": {
         "choose-download-folder": "Choose download folder",
+        "download-finish-settings": {
+          "label": "Download on finish",
+          "prompt": {
+            "last-percent": "After x percent",
+            "last-seconds": "Last x seconds",
+            "title": "Configure when to download"
+          },
+          "submenu": {
+            "advanced": "Advanced",
+            "enabled": "Enabled",
+            "mode": "Time mode",
+            "percent": "Percent",
+            "seconds": "Seconds"
+          }
+        },
         "download-playlist": "Download playlist",
         "presets": "Presets",
         "skip-existing": "Skip existing files"
@@ -590,19 +659,19 @@
       "dialog": {
         "lastfm": {
           "auth-failed": {
-            "title": "Authentication Failed",
-            "message": "Failed to authenticate with Last.fm\nHide the popup until the next restart."
+            "message": "Failed to authenticate with Last.fm\nHide the popup until the next restart.",
+            "title": "Authentication Failed"
           }
         }
       },
       "menu": {
-        "scrobble-other-media": "Scrobble other media",
         "lastfm": {
           "api-settings": "Last.fm API Settings"
         },
         "listenbrainz": {
           "token": "Enter ListenBrainz user token"
-        }
+        },
+        "scrobble-other-media": "Scrobble other media"
       },
       "name": "Scrobbler",
       "prompt": {
@@ -649,6 +718,63 @@
       "description": "Automatically Skips non-music parts like intro/outro or parts of music videos where the song isn't playing",
       "name": "SponsorBlock"
     },
+    "synced-lyrics": {
+      "description": "Provides synced lyrics to songs, using providers like LRClib.",
+      "errors": {
+        "fetch": "⚠️\tAn error occurred while fetching the lyrics.\n\tPlease try again later.",
+        "not-found": "⚠️ No lyrics found for this song."
+      },
+      "menu": {
+        "default-text-string": {
+          "label": "Default character between lyrics",
+          "tooltip": "Choose the default character to use for the gap between lyrics"
+        },
+        "line-effect": {
+          "label": "Line effect",
+          "submenu": {
+            "fancy": {
+              "label": "Fancy",
+              "tooltip": "Use large, app-like effects on the current line"
+            },
+            "focus": {
+              "label": "Focus",
+              "tooltip": "Make only the current line white"
+            },
+            "offset": {
+              "label": "Offset",
+              "tooltip": "Offset on the right the current line"
+            },
+            "scale": {
+              "label": "Scale",
+              "tooltip": "Scale the current line"
+            }
+          },
+          "tooltip": "Choose the effect to apply to the current line"
+        },
+        "precise-timing": {
+          "label": "Make the lyrics perfectly synced",
+          "tooltip": "Calculate to the milisecond the display of the next line (can have a small impact on performance)"
+        },
+        "show-lyrics-even-if-inexact": {
+          "label": "Show lyrics even if inexact",
+          "tooltip": "If the song is not found, the plugin tries again with a different search query.\nThe result from the second attempt may not be exact."
+        },
+        "show-time-codes": {
+          "label": "Show time codes",
+          "tooltip": "Show the time codes next to the lyrics"
+        }
+      },
+      "name": "Synced Lyrics",
+      "refetch-btn": {
+        "fetching": "Fetching...",
+        "normal": "Refetch lyrics"
+      },
+      "warnings": {
+        "duration-mismatch": "⚠️ - The lyrics may be out of sync due to a duration mismatch.",
+        "inexact": "⚠️ - The lyrics for this song may not be exact",
+        "instrumental": "⚠️ - This is an instrumental song"
+      }
+    },
     "taskbar-mediacontrol": {
       "description": "Control playback from your Windows taskbar",
       "name": "Taskbar Media Control"
@@ -693,6 +819,18 @@
         "visualizer-type": "Visualizer Type"
       },
       "name": "Visualizer"
+    },
+    "equalizer": {
+      "description": "Adds an equalizer to the player",
+      "name": "Equalizer",
+      "menu": {
+        "presets": {
+          "label": "Presets",
+          "list": {
+            "bass-booster": "Bass booster"
+          }
+        }
+      }
     }
   }
 }

@@ -11,6 +11,8 @@ import {
   shell,
   dialog,
   ipcMain,
+  protocol,
+  type BrowserWindowConstructorOptions,
 } from 'electron';
 import enhanceWebRequest, {
   BetterSession,
@@ -82,6 +84,34 @@ if (!gotTheLock) {
   app.exit();
 }
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'http',
+    privileges: {
+      standard: true,
+      bypassCSP: true,
+      allowServiceWorkers: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+      codeCache: true,
+    },
+  },
+  {
+    scheme: 'https',
+    privileges: {
+      standard: true,
+      bypassCSP: true,
+      allowServiceWorkers: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+      codeCache: true,
+    },
+  },
+  { scheme: 'mailto', privileges: { standard: true } },
+]);
+
 // Ozone platform hint: Required for Wayland support
 app.commandLine.appendSwitch('ozone-platform-hint', 'auto');
 // SharedArrayBuffer: Required for downloader (@ffmpeg/core-mt)
@@ -100,9 +130,22 @@ if (config.get('options.disableHardwareAcceleration')) {
   app.disableHardwareAcceleration();
 }
 
-if (is.linux() && config.plugins.isEnabled('shortcuts')) {
+if (is.linux()) {
+  // Overrides WM_CLASS for X11 to correspond to icon filename
+  app.setName('com.github.th_ch.youtube_music');
+
+  // Workaround for issue #2248
+  if (
+    process.env.XDG_SESSION_TYPE === 'wayland' ||
+    process.env.WAYLAND_DISPLAY
+  ) {
+    app.commandLine.appendSwitch('disable-gpu-memory-buffer-video-frames');
+  }
+
   // Stops chromium from launching its own MPRIS service
-  app.commandLine.appendSwitch('disable-features', 'MediaSessionService');
+  if (config.plugins.isEnabled('shortcuts')) {
+    app.commandLine.appendSwitch('disable-features', 'MediaSessionService');
+  }
 }
 
 if (config.get('options.proxy')) {
@@ -277,6 +320,23 @@ async function createMainWindow() {
     height: 32,
   };
 
+  const decorations: Partial<BrowserWindowConstructorOptions> = {
+    frame: !is.macOS() && !useInlineMenu,
+    titleBarOverlay: defaultTitleBarOverlayOptions,
+    titleBarStyle: useInlineMenu
+      ? 'hidden'
+      : is.macOS()
+        ? 'hiddenInset'
+        : 'default',
+    autoHideMenuBar: config.get('options.hideMenu'),
+  };
+
+  // Note: on linux, for some weird reason, having these extra properties with 'frame: false' does not work
+  if (is.linux() && useInlineMenu) {
+    delete decorations.titleBarOverlay;
+    delete decorations.titleBarStyle;
+  }
+
   const win = new BrowserWindow({
     icon,
     width: windowSize.width,
@@ -294,14 +354,7 @@ async function createMainWindow() {
             sandbox: false,
           }),
     },
-    frame: !is.macOS() && !useInlineMenu,
-    titleBarOverlay: defaultTitleBarOverlayOptions,
-    titleBarStyle: useInlineMenu
-      ? 'hidden'
-      : is.macOS()
-      ? 'hiddenInset'
-      : 'default',
-    autoHideMenuBar: config.get('options.hideMenu'),
+    ...decorations,
   });
   initHook(win);
   initTheme(win);
@@ -312,28 +365,31 @@ async function createMainWindow() {
     const { x: windowX, y: windowY } = windowPosition;
     const winSize = win.getSize();
     const display = screen.getDisplayNearestPoint(windowPosition);
-    const scaleFactor = is.windows() ? display.scaleFactor: 1;
+    const primaryDisplay = screen.getPrimaryDisplay();
 
-    const scaledWidth = Math.floor(windowSize.width / scaleFactor);
-    const scaledHeight = Math.floor(windowSize.height / scaleFactor);
+    const scaleFactor = is.windows()
+      ? primaryDisplay.scaleFactor / display.scaleFactor
+      : 1;
+    const scaledWidth = Math.floor(windowSize.width * scaleFactor);
+    const scaledHeight = Math.floor(windowSize.height * scaleFactor);
 
     const scaledX = windowX;
     const scaledY = windowY;
 
     if (
-      scaledX + scaledWidth < display.bounds.x - 8 ||
-      scaledX - scaledWidth > display.bounds.x + display.bounds.width ||
-      scaledY < display.bounds.y - 8 ||
-      scaledY > display.bounds.y + display.bounds.height
+      scaledX + scaledWidth / 2 < display.bounds.x - 8 || // Left
+      scaledX + scaledWidth / 2 > display.bounds.x + display.bounds.width || // Right
+      scaledY < display.bounds.y - 8 || // Top
+      scaledY + scaledHeight / 2 > display.bounds.y + display.bounds.height // Bottom
     ) {
       // Window is offscreen
       if (is.dev()) {
         console.warn(
           LoggerPrefix,
           t('main.console.window.tried-to-render-offscreen', {
-            winSize: String(winSize),
-            displaySize: String(display.bounds),
-            windowPosition: String(windowPosition),
+            windowSize: String(winSize),
+            displaySize: JSON.stringify(display.bounds),
+            position: JSON.stringify(windowPosition),
           }),
         );
       }
@@ -421,7 +477,7 @@ async function createMainWindow() {
         ...defaultTitleBarOverlayOptions,
         height: Math.floor(
           defaultTitleBarOverlayOptions.height! *
-          win.webContents.getZoomFactor(),
+            win.webContents.getZoomFactor(),
         ),
       });
     }
@@ -434,7 +490,7 @@ async function createMainWindow() {
       event.preventDefault();
 
       win.webContents.loadURL(
-        'https://accounts.google.com/ServiceLogin?ltmpl=music&service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26next%3Dhttps%253A%252F%252Fmusic.youtube.com%252F'
+        'https://accounts.google.com/ServiceLogin?ltmpl=music&service=youtube&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26next%3Dhttps%253A%252F%252Fmusic.youtube.com%252F',
       );
     }
   });
@@ -449,17 +505,18 @@ app.once('browser-window-created', (_event, win) => {
     // User agents are from https://developers.whatismybrowser.com/useragents/explore/
     const originalUserAgent = win.webContents.userAgent;
     const userAgents = {
-      mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 12.1; rv:95.0) Gecko/20100101 Firefox/95.0',
+      mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.152 Safari/537.36',
       windows:
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:95.0) Gecko/20100101 Firefox/95.0',
-      linux: 'Mozilla/5.0 (Linux x86_64; rv:95.0) Gecko/20100101 Firefox/95.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.152 Safari/537.36',
+      linux:
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.6723.152 Safari/537.36',
     };
 
     const updatedUserAgent = is.macOS()
       ? userAgents.mac
       : is.windows()
-      ? userAgents.windows
-      : userAgents.linux;
+        ? userAgents.windows
+        : userAgents.linux;
 
     win.webContents.userAgent = updatedUserAgent;
     app.userAgentFallback = updatedUserAgent;
@@ -508,7 +565,11 @@ app.once('browser-window-created', (_event, win) => {
         console.log(log);
       }
 
-      if (errorCode !== -3) {
+      if (
+        errorCode !== -3 &&
+        // Workaround for #2435
+        !new URL(validatedURL).hostname.includes('doubleclick.net')
+      ) {
         // -3 is a false positive
         win.webContents.send('log', log);
         win.webContents.loadFile(ErrorHtmlAsset);
@@ -597,6 +658,7 @@ app.whenReady().then(async () => {
           shortcutDetails.target !== appLocation ||
           shortcutDetails.appUserModelId !== appID
         ) {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
           throw 'needUpdate';
         }
       } catch (error) {
@@ -620,7 +682,9 @@ app.whenReady().then(async () => {
     // In dev mode, get string from process.env.VITE_DEV_SERVER_URL, else use fs.readFileSync
     if (is.dev() && process.env.ELECTRON_RENDERER_URL) {
       // HACK: to make vite work with electron renderer (supports hot reload)
-      event.returnValue = [null, `
+      event.returnValue = [
+        null,
+        `
         console.log('${LoggerPrefix}', 'Loading vite from dev server');
         (async () => {
           await new Promise((resolve) => {
@@ -641,7 +705,8 @@ app.whenReady().then(async () => {
           document.body.appendChild(rendererScript);
         })();
         0
-      `];
+      `,
+      ];
     } else {
       const rendererPath = path.join(__dirname, '..', 'renderer');
       const indexHTML = parse(
@@ -653,7 +718,10 @@ app.whenReady().then(async () => {
         scriptSrc.getAttribute('src')!,
       );
       const scriptString = fs.readFileSync(scriptPath, 'utf-8');
-      event.returnValue = [url.pathToFileURL(scriptPath).toString(), scriptString + ';0'];
+      event.returnValue = [
+        url.pathToFileURL(scriptPath).toString(),
+        scriptString + ';0',
+      ];
     }
   });
 
@@ -837,9 +905,21 @@ function removeContentSecurityPolicy(
   betterSession.webRequest.onHeadersReceived((details, callback) => {
     details.responseHeaders ??= {};
 
-    // Remove the content security policy
-    delete details.responseHeaders['content-security-policy-report-only'];
-    delete details.responseHeaders['content-security-policy'];
+    // prettier-ignore
+    if (new URL(details.url).protocol === 'https:') {
+      // Remove the content security policy
+      delete details.responseHeaders['content-security-policy-report-only'];
+      delete details.responseHeaders['Content-Security-Policy-Report-Only'];
+      delete details.responseHeaders['content-security-policy'];
+      delete details.responseHeaders['Content-Security-Policy'];
+
+      if (
+        !details.responseHeaders['access-control-allow-origin'] &&
+        !details.responseHeaders['Access-Control-Allow-Origin']
+      ) {
+        details.responseHeaders['access-control-allow-origin'] = ['https://music.youtube.com'];
+      }
+    }
 
     callback({ cancel: false, responseHeaders: details.responseHeaders });
   });

@@ -3,6 +3,8 @@ import sliderHTML from './templates/slider.html?raw';
 import { getSongMenu } from '@/providers/dom-elements';
 import { singleton } from '@/providers/decorators';
 
+import { defaultTrustedTypePolicy } from '@/utils/trusted-types';
+
 import { ElementFromHtml } from '../utils/renderer';
 
 const slider = ElementFromHtml(sliderHTML);
@@ -22,7 +24,11 @@ const updatePlayBackSpeed = () => {
 
   const playbackSpeedElement = document.querySelector('#playback-speed-value');
   if (playbackSpeedElement) {
-    playbackSpeedElement.innerHTML = String(playbackSpeed);
+    const targetHtml = String(playbackSpeed);
+    (playbackSpeedElement.innerHTML as string | TrustedHTML) =
+      defaultTrustedTypePolicy
+        ? defaultTrustedTypePolicy.createHTML(targetHtml)
+        : targetHtml;
   }
 };
 
@@ -53,13 +59,7 @@ const observePopupContainer = () => {
       menu = getSongMenu();
     }
 
-    if (
-      menu &&
-      (
-        menu.parentElement as HTMLElement & { eventSink_: Element | null }
-      )?.eventSink_?.matches('ytmusic-menu-renderer.ytmusic-player-bar') &&
-      !menu.contains(slider)
-    ) {
+    if (menu && !menu.contains(slider)) {
       menu.prepend(slider);
       setupSliderListener();
     }
