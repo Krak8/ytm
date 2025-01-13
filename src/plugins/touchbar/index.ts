@@ -1,9 +1,11 @@
-import { type NativeImage, TouchBar } from 'electron';
+import { nativeImage, type NativeImage, TouchBar } from 'electron';
 
 import { createPlugin } from '@/utils';
 import getSongControls from '@/providers/song-controls';
-import registerCallback from '@/providers/song-info';
+import registerCallback, { SongInfoEvent } from '@/providers/song-info';
 import { t } from '@/i18n';
+
+import youtubeMusicIcon from '@assets/youtube-music.png?asset&asarUnpack';
 
 export default createPlugin({
   name: () => t('plugins.touchbar.name'),
@@ -79,7 +81,8 @@ export default createPlugin({
       controls = [previous, playPause, next, dislike, like];
 
       // Register the callback
-      registerCallback((songInfo) => {
+      registerCallback((songInfo, event) => {
+        if (event === SongInfoEvent.TimeChanged) return;
         // Song information changed, so lets update the touchBar
 
         // Set the song title
@@ -89,9 +92,11 @@ export default createPlugin({
         pausePlayButton.label = songInfo.isPaused ? '▶️' : '⏸';
 
         // Get image source
-        songImage.icon = songInfo.image
-          ? songInfo.image.resize({ height: 23 })
-          : undefined;
+        songImage.icon = (
+          songInfo.image
+            ? songInfo.image
+            : nativeImage.createFromPath(youtubeMusicIcon)
+        ).resize({ height: 23 });
 
         window.setTouchBar(touchBar);
       });

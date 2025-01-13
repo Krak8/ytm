@@ -2,6 +2,8 @@ import { LoggerPrefix } from '@/utils';
 
 import { t } from '@/i18n';
 
+import { defaultTrustedTypePolicy } from '@/utils/trusted-types';
+
 import type { SongInfo } from '@/providers/song-info';
 import type { RendererContext } from '@/types/contexts';
 import type { LyricsGeniusPluginConfig } from '@/plugins/lyrics-genius/index';
@@ -10,7 +12,7 @@ export const onRendererLoad = ({
   ipc: { invoke, on },
 }: RendererContext<LyricsGeniusPluginConfig>) => {
   const setLyrics = (lyricsContainer: Element, lyrics: string | null) => {
-    lyricsContainer.innerHTML = `
+    const targetHtml = `
       <div id="contents" class="style-scope ytmusic-section-list-renderer description ytmusic-description-shelf-renderer genius-lyrics">
         ${
           lyrics?.replaceAll(/\r\n|\r|\n/g, '<br/>') ??
@@ -20,6 +22,10 @@ export const onRendererLoad = ({
       <yt-formatted-string class="footer style-scope ytmusic-description-shelf-renderer" style="align-self: baseline">
       </yt-formatted-string>
     `;
+    (lyricsContainer.innerHTML as string | TrustedHTML) =
+      defaultTrustedTypePolicy
+        ? defaultTrustedTypePolicy.createHTML(targetHtml)
+        : targetHtml;
 
     if (lyrics) {
       const footer = lyricsContainer.querySelector('.footer');
@@ -77,6 +83,7 @@ export const onRendererLoad = ({
           applyLyricsTabState();
         }
       };
+
       const applyLyricsTabState = () => {
         if (lyrics) {
           tabs.lyrics.removeAttribute('disabled');
@@ -86,6 +93,7 @@ export const onRendererLoad = ({
           tabs.lyrics.setAttribute('aria-disabled', '');
         }
       };
+
       const lyricsTabHandler = () => {
         const tabContainer = document.querySelector('ytmusic-tab-renderer');
         if (!tabContainer) return;

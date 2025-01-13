@@ -96,11 +96,11 @@
           "advanced-options": {
             "label": "進階選項",
             "submenu": {
-              "auto-reset-app-cache": "當程式啟動時重設應用程式快取",
+              "auto-reset-app-cache": "啟動時重設應用快取",
               "disable-hardware-acceleration": "關閉硬體加速",
               "edit-config-json": "編輯 config.json",
               "override-user-agent": "覆寫使用者代理",
-              "restart-on-config-changes": "在設定檔更動時自動重啟應用程式",
+              "restart-on-config-changes": "設定變更時自動重啟應用",
               "set-proxy": {
                 "label": "設定代理伺服器",
                 "prompt": {
@@ -123,7 +123,7 @@
           },
           "language": {
             "dialog": {
-              "message": "語言會在下一次重啟應用程式時變更",
+              "message": "語言會在重啟應用後變更",
               "title": "語言已變更"
             },
             "label": "語言",
@@ -131,7 +131,7 @@
               "to-help-translate": "想協助翻譯？按一下這裡"
             }
           },
-          "resume-on-start": "應用啟動時繼續上次播放的歌曲",
+          "resume-on-start": "應用開啟時繼續播放上次的歌曲",
           "single-instance-lock": "單實例模式",
           "start-at-login": "開機時啟動",
           "starting-page": {
@@ -142,8 +142,8 @@
             "label": "系統匣",
             "submenu": {
               "disabled": "已停用",
-              "enabled-and-hide-app": "啟用並最小化應用程式",
-              "enabled-and-show-app": "啟用但持續顯示應用程式",
+              "enabled-and-hide-app": "啟用並最小化應用",
+              "enabled-and-show-app": "啟用並顯示應用",
               "play-pause-on-click": "點擊時播放／暫停"
             }
           },
@@ -207,6 +207,10 @@
     }
   },
   "plugins": {
+    "ad-speedup": {
+      "description": "使用 16 倍速播放及靜音來跳過廣告片段",
+      "name": "加速略過"
+    },
     "adblocker": {
       "description": "阻擋所有廣告",
       "menu": {
@@ -219,7 +223,7 @@
       "name": "進階專輯操作"
     },
     "album-color-theme": {
-      "description": "依歌曲色調自動更改應用程式主題",
+      "description": "根據專輯封面色調更改應用程式主題顏色",
       "menu": {
         "color-mix-ratio": {
           "label": "顏色混合程度",
@@ -275,6 +279,56 @@
       },
       "name": "微光效果"
     },
+    "amuse": {
+      "description": "加入支援 6K Labs 的 Amuse OBS 外掛以取得 Youtube Music 現正播放資訊",
+      "name": "Amuse",
+      "response": {
+        "query": "Amuse API 伺服器正在運行中，使用 /query 以取得歌曲資訊。"
+      }
+    },
+    "api-server": {
+      "description": "新增伺服器以使用 API 控制播放器",
+      "dialog": {
+        "request": {
+          "buttons": {
+            "allow": "允許",
+            "deny": "拒絕"
+          },
+          "message": "允許 {{ID}} ({{origin}}) 訪問 API 嗎？",
+          "title": "API 驗證請求"
+        }
+      },
+      "menu": {
+        "auth-strategy": {
+          "label": "驗證策略",
+          "submenu": {
+            "auth-at-first": {
+              "label": "首次請求時驗證"
+            },
+            "none": {
+              "label": "不要驗證"
+            }
+          }
+        },
+        "hostname": {
+          "label": "主機名稱"
+        },
+        "port": {
+          "label": "接口"
+        }
+      },
+      "name": "API 伺服器 [Beta]",
+      "prompt": {
+        "hostname": {
+          "label": "輸入 API 伺服器的主機名稱 例 (0.0.0.0)：",
+          "title": "主機名稱"
+        },
+        "port": {
+          "label": "輸入 API 伺服器接口：",
+          "title": "接口"
+        }
+      }
+    },
     "audio-compressor": {
       "description": "使用音效壓縮 (大聲部份的音量降低, 柔和部份的音量提高)",
       "name": "音效壓縮器"
@@ -296,7 +350,7 @@
       "name": "標題選擇器",
       "prompt": {
         "selector": {
-          "label": "目前標題語言: {{language}}",
+          "label": "目前標題語言：{{language}}",
           "none": "無",
           "title": "選擇標題語言"
         }
@@ -341,10 +395,10 @@
     "discord": {
       "backend": {
         "already-connected": "已嘗試可用連接",
-        "connected": "已連接至Discord",
-        "disconnected": "與Discord斷開連接"
+        "connected": "已連接至 Discord",
+        "disconnected": "與 Discord 斷開連接"
       },
-      "description": "使用Discord狀態與你的好友分享你正在收聽的音樂",
+      "description": "使用 Discord 狀態與你的好友分享你正在收聽的音樂",
       "menu": {
         "auto-reconnect": "自動重新連接",
         "clear-activity": "清除狀態",
@@ -352,14 +406,14 @@
         "connected": "已連接",
         "disconnected": "已斷開連接",
         "hide-duration-left": "隱藏音樂剩餘時間狀態",
-        "hide-github-button": "隱藏Github頁面按鈕",
-        "play-on-youtube-music": "顯示Play on YouTube Music按鈕",
+        "hide-github-button": "隱藏 Github 頁面按鈕",
+        "play-on-youtube-music": "顯示 Play on YouTube Music 按鈕",
         "set-inactivity-timeout": "設定閒置狀態時長"
       },
-      "name": "Discord狀態",
+      "name": "Discord 狀態",
       "prompt": {
         "set-inactivity-timeout": {
-          "label": "設定多少秒後清除狀態:",
+          "label": "設定多少秒後清除狀態：",
           "title": "設定閒置狀態時長"
         }
       }
@@ -384,11 +438,11 @@
           }
         },
         "feedback": {
-          "conversion-progress": "轉檔進度: {{percent}}%",
+          "conversion-progress": "轉檔進度：{{percent}}%",
           "converting": "轉檔中…",
-          "done": "完成下載: {{filePath}}",
+          "done": "完成下載：{{filePath}}",
           "download-info": "正在下載 {{artist}} - {{title}} [{{videoId}}",
-          "download-progress": "下載進度: {{percent}}%",
+          "download-progress": "下載進度：{{percent}}%",
           "downloading": "下載中…",
           "downloading-counter": "正在下載第 {{current}}/{{total}}…",
           "downloading-playlist": "正在下載播放清單 \"{{playlistTitle}}\" - 共 {{playlistSize}} 首歌 ({{playlistId}})",
@@ -399,17 +453,32 @@
           "playlist-has-only-one-song": "播放清單內只有一首歌曲, 將直接下載",
           "playlist-id-not-found": "沒有找到播放清單 ID",
           "playlist-is-empty": "播放清單是空的",
-          "playlist-is-mix-or-private": "獲取播放清單資訊時發生錯誤: 請確認非私人播放清單或是\"為你推薦的合輯\"\n\n{{error}}",
+          "playlist-is-mix-or-private": "獲取播放清單資訊時發生錯誤：請確認非私人播放清單或是\"為你推薦的合輯\"\n\n{{error}}",
           "preparing-file": "正在準備檔案…",
           "saving": "儲存中…",
-          "trying-to-get-playlist-id": "正在嘗試獲取播放清單 ID: {{playlistId}}",
+          "trying-to-get-playlist-id": "正在嘗試獲取播放清單 ID：{{playlistId}}",
           "video-id-not-found": "未能找到該影片",
           "writing-id3": "正在寫入 ID3 標籤…"
         }
       },
-      "description": "在應用程式內下載 MP3／原始音樂檔",
+      "description": "開啟應用程式內下載 MP3／原始音檔功能",
       "menu": {
         "choose-download-folder": "選擇下載位置",
+        "download-finish-settings": {
+          "label": "智慧下載",
+          "prompt": {
+            "last-percent": "歌曲剩餘多少 % 時下載",
+            "last-seconds": "歌曲剩餘多少秒時下載",
+            "title": "智慧下載進階設定"
+          },
+          "submenu": {
+            "advanced": "進階",
+            "enabled": "啟用",
+            "mode": "判斷方式",
+            "percent": "百分比",
+            "seconds": "秒數"
+          }
+        },
         "download-playlist": "下載播放清單",
         "presets": "預設格式",
         "skip-existing": "跳過已存在的檔案"
@@ -421,6 +490,18 @@
       "templates": {
         "button": "下載"
       }
+    },
+    "equalizer": {
+      "description": "為播放器加入等化器",
+      "menu": {
+        "presets": {
+          "label": "預設格式",
+          "list": {
+            "bass-booster": "低音增強器"
+          }
+        }
+      },
+      "name": "等化器"
     },
     "exponential-volume": {
       "description": "使音量滑桿指數化，以便更容易選擇較低的音量。",
@@ -444,7 +525,7 @@
       },
       "name": "第三方字幕",
       "renderer": {
-        "fetched-lyrics": "為Genius獲取字幕"
+        "fetched-lyrics": "為 Genius 獲取字幕"
       }
     },
     "music-together": {
@@ -494,12 +575,12 @@
       }
     },
     "navigation": {
-      "description": "將上一頁／下一頁按鈕新增至應用程式上方, 就像你最熟悉的瀏覽器",
+      "description": "允許應用程式上方顯示上一頁／下一頁按鈕",
       "name": "導覽列"
     },
     "no-google-login": {
-      "description": "移除Google登入按鈕及連結",
-      "name": "停用Google登入"
+      "description": "移除 Google 登入按鈕及連結",
+      "name": "停用 Google 登入"
     },
     "notifications": {
       "description": "在歌曲播放時發送一個系統通知 (可互動通知僅限Windows)",
@@ -563,7 +644,7 @@
             "decrease": "降低音量",
             "increase": "增加音量"
           },
-          "label": "選擇全域音量控制快捷鍵:",
+          "label": "選擇全域音量控制快捷鍵：",
           "title": "全域音量控制快捷鍵"
         },
         "volume-steps": {
@@ -576,8 +657,8 @@
       "backend": {
         "dialog": {
           "quality-changer": {
-            "detail": "目前畫質: {{quality}}",
-            "message": "選擇影片畫質:",
+            "detail": "目前畫質：{{quality}}",
+            "message": "選擇影片畫質：",
             "title": "選擇影片畫質"
           }
         }
@@ -632,7 +713,7 @@
             "play-pause": "播放／暫停",
             "previous": "上一首"
           },
-          "label": "選擇全域音樂控制快捷鍵:",
+          "label": "選擇全域音樂控制快捷鍵：",
           "title": "全域快捷鍵"
         }
       }
@@ -649,8 +730,65 @@
       "description": "自動跳過贊助片段",
       "name": "贊助阻擋"
     },
+    "synced-lyrics": {
+      "description": "使用 LRClib 等管道提供歌詞同步顯示。",
+      "errors": {
+        "fetch": "⚠️\t擷取歌詞時發生錯誤\n請稍後再試。",
+        "not-found": "⚠️未找到該首歌曲的歌詞。"
+      },
+      "menu": {
+        "default-text-string": {
+          "label": "預設歌詞中間隔的符號",
+          "tooltip": "選擇歌詞中間隔要使用的符號"
+        },
+        "line-effect": {
+          "label": "歌詞顯示效果",
+          "submenu": {
+            "fancy": {
+              "label": "絢麗",
+              "tooltip": "使用較為接近原生樣式並且放大當前該行歌詞"
+            },
+            "focus": {
+              "label": "高亮",
+              "tooltip": "高亮當前的歌詞"
+            },
+            "offset": {
+              "label": "凸行",
+              "tooltip": "凸行當前的歌詞"
+            },
+            "scale": {
+              "label": "放大",
+              "tooltip": "放大當前的歌詞"
+            }
+          },
+          "tooltip": "選擇要使用的歌詞顯示效果"
+        },
+        "precise-timing": {
+          "label": "使歌詞完美同步",
+          "tooltip": "更精確的計算下一行歌詞的顯示(將會降低些許效能)"
+        },
+        "show-lyrics-even-if-inexact": {
+          "label": "即使不精確依然強制顯示歌詞",
+          "tooltip": "當找不到符合該歌曲的歌詞時，該功能會嘗試不同的搜尋方式。\n使用不同的搜尋方式會導致不精確的結果。"
+        },
+        "show-time-codes": {
+          "label": "顯示時間線",
+          "tooltip": "在歌詞旁顯示時間線"
+        }
+      },
+      "name": "歌詞同步",
+      "refetch-btn": {
+        "fetching": "擷取中...",
+        "normal": "重新擷取歌詞"
+      },
+      "warnings": {
+        "duration-mismatch": "⚠️歌詞可能會出現不同步的情況。",
+        "inexact": "⚠️該歌曲的歌詞可能並不精確",
+        "instrumental": "⚠️該首歌曲為純音樂"
+      }
+    },
     "taskbar-mediacontrol": {
-      "description": "透過工作列應用程式圖式控制媒體播放",
+      "description": "允許工作列應用程式預覽介面顯示媒體控制相關按鈕",
       "name": "工作列媒體控制"
     },
     "touchbar": {

@@ -2,7 +2,11 @@ import { singleton } from './decorators';
 
 import type { YoutubePlayer } from '@/types/youtube-player';
 import type { GetState } from '@/types/datahost-get-state';
-import type { AlbumDetails, VideoDataChangeValue } from '@/types/player-api-events';
+import type {
+  AlbumDetails,
+  PlayerOverlays,
+  VideoDataChangeValue,
+} from '@/types/player-api-events';
 
 import type { SongInfo } from './song-info';
 import type { VideoDataChanged } from '@/types/video-data-changed';
@@ -10,9 +14,12 @@ import type { VideoDataChanged } from '@/types/video-data-changed';
 let songInfo: SongInfo = {} as SongInfo;
 export const getSongInfo = () => songInfo;
 
-window.ipcRenderer.on('ytmd:update-song-info', (_, extractedSongInfo: SongInfo) => {
-  songInfo = extractedSongInfo;
-});
+window.ipcRenderer.on(
+  'ytmd:update-song-info',
+  (_, extractedSongInfo: SongInfo) => {
+    songInfo = extractedSongInfo;
+  },
+);
 
 // Used because 'loadeddata' or 'loadedmetadata' weren't firing on song start for some users (https://github.com/th-ch/youtube-music/issues/473)
 const srcChangedEvent = new CustomEvent('ytmd:src-changed');
@@ -91,9 +98,8 @@ export const setupFullScreenChangedListener = singleton(() => {
   const observer = new MutationObserver(() => {
     window.ipcRenderer.send(
       'ytmd:fullscreen-changed',
-      (
-        playerBar?.attributes.getNamedItem('player-fullscreened') ?? null
-      ) !== null,
+      (playerBar?.attributes.getNamedItem('player-fullscreened') ?? null) !==
+        null,
     );
   });
 
@@ -200,18 +206,50 @@ export default (api: YoutubePlayer) => {
     for (const status of ['playing', 'pause'] as const) {
       video.addEventListener(status, playPausedHandlers[status]);
     }
+
+    if (!isNaN(video.duration)) {
+      const {
+        title,
+        author,
+        video_id: videoId,
+        list: playlistId,
+      } = api.getVideoData();
+
+      const watchNextResponse = api.getWatchNextResponse();
+
+      sendSongInfo({
+        title,
+        author,
+        videoId,
+        playlistId,
+
+        isUpcoming: false,
+        lengthSeconds: video.duration,
+        loading: true,
+
+        ytmdWatchNextResponse: watchNextResponse,
+      } satisfies VideoDataChangeValue);
+    }
   }
 
   function sendSongInfo(videoData: VideoDataChangeValue) {
     const data = api.getPlayerResponse();
 
-    data.videoDetails.album = (
-      Object.entries(videoData).find(
-        ([, value]) => value && Object.hasOwn(value, 'playerOverlays'),
-      ) as [string, AlbumDetails | undefined]
-    )?.[1]?.playerOverlays?.playerOverlayRenderer?.browserMediaSession?.browserMediaSessionRenderer?.album?.runs?.at(
-      0,
-    )?.text;
+    let playerOverlay: PlayerOverlays | undefined;
+
+    if (!videoData.ytmdWatchNextResponse) {
+      playerOverlay = (
+        Object.entries(videoData).find(
+          ([, value]) => value && Object.hasOwn(value, 'playerOverlays'),
+        ) as [string, AlbumDetails | undefined]
+      )?.[1]?.playerOverlays;
+    } else {
+      playerOverlay = videoData.ytmdWatchNextResponse?.playerOverlays;
+    }
+    data.videoDetails.album =
+      playerOverlay?.playerOverlayRenderer?.browserMediaSession?.browserMediaSessionRenderer?.album?.runs?.at(
+        0,
+      )?.text;
     data.videoDetails.elapsedSeconds = 0;
     data.videoDetails.isPaused = false;
 

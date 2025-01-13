@@ -8,6 +8,8 @@ import { LoggerPrefix } from '@/utils';
 
 import { t } from '@/i18n';
 
+import { defaultTrustedTypePolicy } from '@/utils/trusted-types';
+
 import { ElementFromHtml } from '../utils/renderer';
 
 import type { RendererContext } from '@/types/contexts';
@@ -39,7 +41,9 @@ const menuObserver = new MutationObserver(() => {
   if (!menuUrl?.includes('watch?')) {
     menuUrl = undefined;
     // check for podcast
-    for (const it of document.querySelectorAll('tp-yt-paper-listbox [tabindex="-1"] #navigation-endpoint')) {
+    for (const it of document.querySelectorAll(
+      'tp-yt-paper-listbox [tabindex="-1"] #navigation-endpoint',
+    )) {
       if (it.getAttribute('href')?.includes('podcast/')) {
         menuUrl = it.getAttribute('href')!;
         break;
@@ -72,7 +76,9 @@ export const onRendererLoad = ({
       ?.getAttribute('href');
 
     if (!videoUrl && songMenu) {
-      for (const it of songMenu.querySelectorAll('ytmusic-menu-navigation-item-renderer[tabindex="-1"] #navigation-endpoint')) {
+      for (const it of songMenu.querySelectorAll(
+        'ytmusic-menu-navigation-item-renderer[tabindex="-1"] #navigation-endpoint',
+      )) {
         if (it.getAttribute('href')?.includes('podcast/')) {
           videoUrl = it.getAttribute('href');
           break;
@@ -86,7 +92,8 @@ export const onRendererLoad = ({
       }
 
       if (videoUrl.startsWith('podcast/')) {
-        videoUrl = defaultConfig.url + '/watch?' + videoUrl.replace('podcast/', 'v=');
+        videoUrl =
+          defaultConfig.url + '/watch?' + videoUrl.replace('podcast/', 'v=');
       }
 
       if (videoUrl.includes('?playlist=')) {
@@ -102,7 +109,10 @@ export const onRendererLoad = ({
 
   ipc.on('downloader-feedback', (feedback: string) => {
     if (progress) {
-      progress.innerHTML = feedback || t('plugins.downloader.templates.button');
+      const targetHtml = feedback || t('plugins.downloader.templates.button');
+      (progress.innerHTML as string | TrustedHTML) = defaultTrustedTypePolicy
+        ? defaultTrustedTypePolicy.createHTML(targetHtml)
+        : targetHtml;
     } else {
       console.warn(
         LoggerPrefix,

@@ -40,6 +40,16 @@ export function cache<T extends (...params: P) => R, P extends never[], R>(
   }) as T;
 }
 
+export function cacheNoArgs<R>(fn: () => R): () => R {
+  let cached: R;
+  return () => {
+    if (cached === undefined) {
+      cached = fn();
+    }
+    return cached;
+  };
+}
+
 /*
   The following are currently unused, but potentially useful in the future
 */
@@ -70,7 +80,7 @@ function memoize<T extends (...params: unknown[]) => unknown>(fn: T): T {
       cache.set(key, fn(...args));
     }
 
-    return cache.get(key) as unknown;
+    return cache.get(key);
   }) as T;
 }
 

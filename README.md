@@ -4,7 +4,7 @@
 
 [![GitHub release](https://img.shields.io/github/release/th-ch/youtube-music.svg?style=for-the-badge&logo=youtube-music)](https://github.com/th-ch/youtube-music/releases/)
 [![GitHub license](https://img.shields.io/github/license/th-ch/youtube-music.svg?style=for-the-badge)](https://github.com/th-ch/youtube-music/blob/master/LICENSE)
-[![eslint code style](https://img.shields.io/badge/code_style-eslint-5ed9c7.svg?style=for-the-badge)](https://github.com/th-ch/youtube-music/blob/master/.eslintrc.js)
+[![eslint code style](https://img.shields.io/badge/code_style-eslint-5ed9c7.svg?style=for-the-badge)](https://github.com/th-ch/youtube-music/blob/master/eslint.config.mjs)
 [![Build status](https://img.shields.io/github/actions/workflow/status/th-ch/youtube-music/build.yml?branch=master&style=for-the-badge&logo=youtube-music)](https://GitHub.com/th-ch/youtube-music/releases/)
 [![GitHub All Releases](https://img.shields.io/github/downloads/th-ch/youtube-music/total?style=for-the-badge&logo=youtube-music)](https://GitHub.com/th-ch/youtube-music/releases/)
 [![AUR](https://img.shields.io/aur/version/youtube-music-bin?color=blueviolet&style=for-the-badge&logo=youtube-music)](https://aur.archlinux.org/packages/youtube-music-bin)
@@ -12,7 +12,7 @@
 
 </div>
 
-![Screenshot](web/screenshot.jpg "Screenshot")
+![Screenshot](web/screenshot.png "Screenshot")
 
 
 <div align="center">
@@ -21,7 +21,7 @@
 	</a>
 </div>
 
-Read this in other languages: [🇰🇷](./docs/readme/README-ko.md), [🇮🇸](./docs/readme/README-is.md), [🇨🇱 🇪🇸](./docs/readme/README-es.md)
+Read this in other languages: [🇰🇷](./docs/readme/README-ko.md), [🇮🇸](./docs/readme/README-is.md), [🇨🇱 🇪🇸](./docs/readme/README-es.md), [🇷🇺](./docs/readme/README-ru.md), [🇭🇺](./docs/readme/README-hu.md)
 
 **Electron wrapper around YouTube Music featuring:**
 
@@ -110,7 +110,7 @@ winget install th-ch.YouTubeMusic
 ## Available plugins:
 
 - **Ad Blocker**: Block all ads and tracking out of the box
-  
+
 - **Album Actions**: Adds Undislike, Dislike, Like, and Unlike buttons to apply this to all songs in a playlist or album
 
 - **Album Color Theme**: Applies a dynamic theme and visual effects based on the album color palette
@@ -137,6 +137,8 @@ winget install th-ch.YouTubeMusic
 
 - **Downloader**: downloads
   MP3 [directly from the interface](https://user-images.githubusercontent.com/61631665/129977677-83a7d067-c192-45e1-98ae-b5a4927393be.png) [(youtube-dl)](https://github.com/ytdl-org/youtube-dl)
+
+- **Equalizer**: add filters to boost or cut specific range of frequencies (e.g. bass booster)
 
 - **Exponential Volume**: Makes the volume
   slider [exponential](https://greasyfork.org/en/scripts/397686-youtube-music-fix-volume-ratio/) so it's easier to
@@ -184,6 +186,8 @@ winget install th-ch.YouTubeMusic
 - [**SponsorBlock**](https://github.com/ajayyy/SponsorBlock): Automatically Skips non-music parts like intro/outro or
   parts of music videos where the song isn't playing
 
+- **Synced Lyrics**: Provides synced lyrics to songs, using providers like [LRClib](https://lrclib.net).
+
 - **Taskbar Media Control**: Control playback from
   your [Windows taskbar](https://user-images.githubusercontent.com/78568641/111916130-24a35e80-8a82-11eb-80c8-5021c1aa27f4.png)
 
@@ -227,6 +231,8 @@ you can add music to queue and/or force play the music immediately.
 >  `http://localhost:8888/queue` gives you song queue list.
 
 
+## Translation
+
 You can help with translation on [Hosted Weblate](https://hosted.weblate.org/projects/youtube-music/).
 
 <a href="https://hosted.weblate.org/engage/youtube-music/">
@@ -255,7 +261,7 @@ brew install th-ch/youtube-music/youtube-music
 If you install the app manually and get an error "is damaged and can’t be opened." when launching the app, run the following in the Terminal:
 
 ```bash
-xattr -cr /Applications/YouTube\ Music.app
+/usr/bin/xattr -cr /Applications/YouTube\ Music.app
 ```
 
 ### Windows

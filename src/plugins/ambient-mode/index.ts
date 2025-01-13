@@ -4,6 +4,7 @@ import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
 import { menu } from './menu';
 import { AmbientModePluginConfig } from './types';
+import { waitForElement } from '@/utils/wait-for-element';
 
 const defaultConfig: AmbientModePluginConfig = {
   enabled: false,
@@ -36,7 +37,7 @@ export default createPlugin({
     unregister: null as (() => void) | null,
     update: null as (() => void) | null,
     interval: null as NodeJS.Timeout | null,
-    lastMediaType: null as "video" | "image" | null,
+    lastMediaType: null as 'video' | 'image' | null,
     lastVideoSource: null as string | null,
     lastImageSource: null as string | null,
 
@@ -52,9 +53,16 @@ export default createPlugin({
 
       const songImage = document.querySelector<HTMLImageElement>('#song-image');
       const songVideo = document.querySelector<HTMLDivElement>('#song-video');
-      const image = songImage?.querySelector<HTMLImageElement>('yt-img-shadow > img');
-      const video = songVideo?.querySelector<HTMLVideoElement>('.html5-video-container > video');
-      const videoWrapper = document.querySelector('#song-video > .player-wrapper');
+      const image = songImage?.querySelector<HTMLImageElement>(
+        'yt-img-shadow > img',
+      );
+      const video = await waitForElement<HTMLVideoElement>(
+        '.html5-video-container > video',
+      );
+
+      const videoWrapper = document.querySelector(
+        '#song-video > .player-wrapper',
+      );
 
       const injectBlurImage = () => {
         if (!songImage || !image) return null;
@@ -93,7 +101,9 @@ export default createPlugin({
         const blurCanvas = document.createElement('canvas');
         blurCanvas.classList.add('html5-blur-canvas');
 
-        const context = blurCanvas.getContext('2d', { willReadFrequently: true });
+        const context = blurCanvas.getContext('2d', {
+          willReadFrequently: true,
+        });
 
         /* effect */
         let lastEffectWorkId: number | null = null;
@@ -107,14 +117,18 @@ export default createPlugin({
             if (!context) return;
 
             const width = this.qualityRatio;
-            let height = Math.max(Math.floor((blurCanvas.height / blurCanvas.width) * width), 1,);
+            let height = Math.max(
+              Math.floor((blurCanvas.height / blurCanvas.width) * width),
+              1,
+            );
             if (!Number.isFinite(height)) height = width;
             if (!height) return;
 
             context.globalAlpha = 1;
             if (lastImageData) {
-              const frameOffset = (1 / this.buffer) * (1000 / this.interpolationTime);
-              context.globalAlpha = 1 - (frameOffset * 2); // because of alpha value must be < 1
+              const frameOffset =
+                (1 / this.buffer) * (1000 / this.interpolationTime);
+              context.globalAlpha = 1 - frameOffset * 2; // because of alpha value must be < 1
               context.putImageData(lastImageData, 0, 0);
               context.globalAlpha = frameOffset;
             }
@@ -135,7 +149,9 @@ export default createPlugin({
           if (newWidth === 0 || newHeight === 0) return;
 
           blurCanvas.width = this.qualityRatio;
-          blurCanvas.height = Math.floor((newHeight / newWidth) * this.qualityRatio);
+          blurCanvas.height = Math.floor(
+            (newHeight / newWidth) * this.qualityRatio,
+          );
 
           if (this.isFullscreen) blurCanvas.classList.add('fullscreen');
           else blurCanvas.classList.remove('fullscreen');
@@ -149,7 +165,10 @@ export default createPlugin({
 
         /* hooking */
         let canvasInterval: NodeJS.Timeout | null = null;
-        canvasInterval = setInterval(onSync, Math.max(1, Math.ceil(1000 / this.buffer)));
+        canvasInterval = setInterval(
+          onSync,
+          Math.max(1, Math.ceil(1000 / this.buffer)),
+        );
 
         const onPause = () => {
           if (canvasInterval) clearInterval(canvasInterval);
@@ -157,7 +176,10 @@ export default createPlugin({
         };
         const onPlay = () => {
           if (canvasInterval) clearInterval(canvasInterval);
-          canvasInterval = setInterval(onSync, Math.max(1, Math.ceil(1000 / this.buffer)));
+          canvasInterval = setInterval(
+            onSync,
+            Math.max(1, Math.ceil(1000 / this.buffer)),
+          );
         };
         songVideo.addEventListener('pause', onPause);
         songVideo.addEventListener('play', onPlay);
@@ -179,12 +201,12 @@ export default createPlugin({
       const isVideoMode = () => {
         const songVideo = document.querySelector<HTMLDivElement>('#song-video');
         if (!songVideo) {
-          this.lastMediaType = "image";
+          this.lastMediaType = 'image';
           return false;
         }
 
         const isVideo = getComputedStyle(songVideo).display !== 'none';
-        this.lastMediaType = isVideo ? "video" : "image";
+        this.lastMediaType = isVideo ? 'video' : 'image';
         return isVideo;
       };
 
@@ -196,16 +218,25 @@ export default createPlugin({
         if (isPageOpen) {
           const isVideo = isVideoMode();
           if (!force) {
-            if (this.lastMediaType === "video" && this.lastVideoSource === video?.src) return false;
-            if (this.lastMediaType === "image" && this.lastImageSource === image?.src) return false;
+            if (
+              this.lastMediaType === 'video' &&
+              this.lastVideoSource === video?.src
+            )
+              return false;
+            if (
+              this.lastMediaType === 'image' &&
+              this.lastImageSource === image?.src
+            )
+              return false;
           }
           this.unregister?.();
-          this.unregister = (isVideo ? injectBlurVideo() : injectBlurImage()) ?? null;
+          this.unregister =
+            (isVideo ? injectBlurVideo() : injectBlurImage()) ?? null;
         } else {
           this.unregister?.();
           this.unregister = null;
         }
-      }
+      };
 
       /* needed for switching between different views (e.g. miniplayer) */
       const observer = new MutationObserver((mutationsList) => {

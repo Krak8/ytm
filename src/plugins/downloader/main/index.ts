@@ -1,12 +1,8 @@
-import {
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
 
-import { app, BrowserWindow, dialog } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain } from 'electron';
 import {
   ClientType,
   Innertube,
@@ -29,12 +25,18 @@ import {
 
 import { fetchFromGenius } from '@/plugins/lyrics-genius/main';
 import { isEnabled } from '@/config/plugins';
-import { cleanupName, getImage, MediaType, type SongInfo } from '@/providers/song-info';
+import registerCallback, {
+  cleanupName,
+  getImage,
+  MediaType,
+  type SongInfo,
+  SongInfoEvent,
+} from '@/providers/song-info';
 import { getNetFetchAsFetch } from '@/plugins/utils/main';
 
 import { t } from '@/i18n';
 
-import { YoutubeFormatList, type Preset, DefaultPresetList } from '../types';
+import { DefaultPresetList, type Preset, YoutubeFormatList } from '../types';
 
 import type { DownloaderPluginConfig } from '../index';
 
@@ -61,13 +63,23 @@ let yt: Innertube;
 let win: BrowserWindow;
 let playingUrl: string;
 
+const isYouTubePremium = () =>
+  win.webContents.executeJavaScript(
+    '!document.querySelector(\'#endpoint[href="/music_premium"]\')',
+  ) as Promise<boolean>;
+
 const sendError = (error: Error, source?: string) => {
   win.setProgressBar(-1); // Close progress bar
   setBadge(0); // Close badge
   sendFeedback_(win); // Reset feedback
 
   const songNameMessage = source ? `\nin ${source}` : '';
-  const cause = error.cause ? `\n\n${String(error.cause)}` : '';
+  const cause = error.cause
+    ? `\n\n${
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string,@typescript-eslint/restrict-template-expressions
+        error.cause instanceof Error ? error.cause.toString() : error.cause
+      }`
+    : '';
   const message = `${error.toString()}${songNameMessage}${cause}`;
 
   console.error(message);
@@ -114,6 +126,8 @@ export const onMainLoad = async ({
   ipc.handle('download-playlist-request', async (url: string) =>
     downloadPlaylist(url),
   );
+
+  downloadSongOnFinishSetup({ ipc, getConfig });
 };
 
 export const onConfigChange = (newConfig: DownloaderPluginConfig) => {
@@ -160,6 +174,61 @@ export async function downloadSongFromId(
   } catch (error: unknown) {
     sendError(error as Error, resolvedName || id);
   }
+}
+
+function downloadSongOnFinishSetup({
+  ipc,
+}: Pick<BackendContext<DownloaderPluginConfig>, 'ipc' | 'getConfig'>) {
+  let currentUrl: string | undefined;
+  let duration: number | undefined;
+  let time = 0;
+
+  const defaultDownloadFolder = app.getPath('downloads');
+
+  registerCallback((songInfo: SongInfo, event) => {
+    if (event === SongInfoEvent.TimeChanged) {
+      const elapsedSeconds = songInfo.elapsedSeconds ?? 0;
+      if (elapsedSeconds > time) time = elapsedSeconds;
+      return;
+    }
+    if (
+      !songInfo.isPaused &&
+      songInfo.url !== currentUrl &&
+      config.downloadOnFinish?.enabled
+    ) {
+      if (typeof currentUrl === 'string' && duration && duration > 0) {
+        if (
+          config.downloadOnFinish.mode === 'seconds' &&
+          duration - time <= config.downloadOnFinish.seconds
+        ) {
+          downloadSong(
+            currentUrl,
+            config.downloadOnFinish.folder ??
+              config.downloadFolder ??
+              defaultDownloadFolder,
+          );
+        } else if (
+          config.downloadOnFinish.mode === 'percent' &&
+          time >= duration * (config.downloadOnFinish.percent / 100)
+        ) {
+          downloadSong(
+            currentUrl,
+            config.downloadOnFinish.folder ??
+              config.downloadFolder ??
+              defaultDownloadFolder,
+          );
+        }
+      }
+
+      currentUrl = songInfo.url;
+      duration = songInfo.songDuration;
+      time = 0;
+    }
+  });
+
+  ipcMain.on('ytmd:player-api-loaded', () => {
+    ipc.send('ytmd:setup-time-changed-listener');
+  });
 }
 
 async function downloadSongUnsafe(
@@ -216,12 +285,12 @@ async function downloadSongUnsafe(
 
   let playabilityStatus = info.playability_status;
   let bypassedResult = null;
-  if (playabilityStatus.status === 'LOGIN_REQUIRED') {
+  if (playabilityStatus?.status === 'LOGIN_REQUIRED') {
     // Try to bypass the age restriction
     bypassedResult = await getAndroidTvInfo(id);
     playabilityStatus = bypassedResult.playability_status;
 
-    if (playabilityStatus.status === 'LOGIN_REQUIRED') {
+    if (playabilityStatus?.status === 'LOGIN_REQUIRED') {
       throw new Error(
         `[${playabilityStatus.status}] ${playabilityStatus.reason}`,
       );
@@ -230,7 +299,7 @@ async function downloadSongUnsafe(
     info = bypassedResult;
   }
 
-  if (playabilityStatus.status === 'UNPLAYABLE') {
+  if (playabilityStatus?.status === 'UNPLAYABLE') {
     const errorScreen =
       playabilityStatus.error_screen as PlayerErrorMessage | null;
     throw new Error(
@@ -249,7 +318,7 @@ async function downloadSongUnsafe(
   }
 
   const downloadOptions: FormatOptions = {
-    type: 'audio', // Audio, video or video+audio
+    type: (await isYouTubePremium()) ? 'audio' : 'video+audio', // Audio, video or video+audio
     quality: 'best', // Best, bestefficiency, 144p, 240p, 480p, 720p and so on.
     format: 'any', // Media container format
   };
@@ -375,7 +444,12 @@ async function iterableStreamToProcessedUint8Array(
         'writeFile',
         safeVideoName,
         Buffer.concat(
-          await downloadChunks(stream, contentLength, sendFeedback, increasePlaylistProgress),
+          await downloadChunks(
+            stream,
+            contentLength,
+            sendFeedback,
+            increasePlaylistProgress,
+          ),
         ),
       );
 
@@ -388,7 +462,7 @@ async function iterableStreamToProcessedUint8Array(
           }),
           ratio,
         );
-        increasePlaylistProgress(0.15 + (ratio * 0.85));
+        increasePlaylistProgress(0.15 + ratio * 0.85);
       });
 
       const safeVideoNameWithExtension = `${safeVideoName}.${extension}`;
@@ -520,9 +594,13 @@ export async function downloadPlaylist(givenUrl?: string | URL) {
     sendError(
       new Error(t('plugins.downloader.backend.feedback.playlist-is-empty')),
     );
+    return;
   }
 
-  const normalPlaylistTitle = playlist.header?.title?.text;
+  const normalPlaylistTitle =
+    playlist.header && 'title' in playlist.header
+      ? playlist.header?.title?.text
+      : undefined;
   const playlistTitle =
     normalPlaylistTitle ??
     playlist.page.contents_memo
@@ -609,7 +687,7 @@ export async function downloadPlaylist(givenUrl?: string | URL) {
 
   const increaseProgress = (itemPercentage: number) => {
     const currentProgress = (counter - 1) / (items.length ?? 1);
-    const newProgress = currentProgress + (progressStep * itemPercentage);
+    const newProgress = currentProgress + progressStep * itemPercentage;
     win.setProgressBar(newProgress);
   };
 

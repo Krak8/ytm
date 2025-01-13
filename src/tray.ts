@@ -1,4 +1,4 @@
-import { Menu, screen, nativeImage, Tray } from 'electron';
+import { Menu, nativeImage, screen, Tray } from 'electron';
 import is from 'electron-is';
 
 import defaultTrayIconAsset from '@assets/youtube-music-tray.png?asset&asarUnpack';
@@ -7,7 +7,7 @@ import pausedTrayIconAsset from '@assets/youtube-music-tray-paused.png?asset&asa
 import config from './config';
 
 import { restart } from './providers/app-controls';
-import registerCallback from './providers/song-info';
+import registerCallback, { SongInfoEvent } from './providers/song-info';
 import getSongControls from './providers/song-controls';
 
 import { t } from '@/i18n';
@@ -49,15 +49,21 @@ export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
 
   const { playPause, next, previous } = getSongControls(win);
 
-  const pixelRatio = is.windows() ? screen.getPrimaryDisplay().scaleFactor || 1 : 1;
-  const defaultTrayIcon = nativeImage.createFromPath(defaultTrayIconAsset).resize({
-    width: 16 * pixelRatio,
-    height: 16 * pixelRatio,
-  });
-  const pausedTrayIcon = nativeImage.createFromPath(pausedTrayIconAsset).resize({
-    width: 16 * pixelRatio,
-    height: 16 * pixelRatio,
-  });
+  const pixelRatio = is.windows()
+    ? screen.getPrimaryDisplay().scaleFactor || 1
+    : 1;
+  const defaultTrayIcon = nativeImage
+    .createFromPath(defaultTrayIconAsset)
+    .resize({
+      width: 16 * pixelRatio,
+      height: 16 * pixelRatio,
+    });
+  const pausedTrayIcon = nativeImage
+    .createFromPath(pausedTrayIconAsset)
+    .resize({
+      width: 16 * pixelRatio,
+      height: 16 * pixelRatio,
+    });
 
   tray = new Tray(defaultTrayIcon);
 
@@ -119,17 +125,21 @@ export const setUpTray = (app: Electron.App, win: Electron.BrowserWindow) => {
   const trayMenu = Menu.buildFromTemplate(template);
   tray.setContextMenu(trayMenu);
 
-  registerCallback((songInfo) => {
+  registerCallback((songInfo, event) => {
+    if (event === SongInfoEvent.TimeChanged) return;
+
     if (tray) {
       if (typeof songInfo.isPaused === 'undefined') {
         tray.setImage(defaultTrayIcon);
         return;
       }
 
-      tray.setToolTip(t('main.tray.tooltip.with-song-info', {
-        artist: songInfo.artist,
-        title: songInfo.title,
-      }));
+      tray.setToolTip(
+        t('main.tray.tooltip.with-song-info', {
+          artist: songInfo.artist,
+          title: songInfo.title,
+        }),
+      );
 
       tray.setImage(songInfo.isPaused ? pausedTrayIcon : defaultTrayIcon);
     }

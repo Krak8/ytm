@@ -207,6 +207,10 @@
     }
   },
   "plugins": {
+    "ad-speedup": {
+      "description": "Se viene riprodotto un annuncio, l'audio viene disattivato e viene impostata la velocità di riproduzione su 16x",
+      "name": "Accelerazione ad"
+    },
     "adblocker": {
       "description": "Blocca tutti gli annunci e i tracker",
       "menu": {
@@ -274,6 +278,56 @@
         }
       },
       "name": "Modalità Ambiente"
+    },
+    "amuse": {
+      "description": "Aggiunge il supporto a YouTube Music per il widget Amuse Now Playing di 6K Labs",
+      "name": "Amuse",
+      "response": {
+        "query": "Il server API di Amuse è in funzione. GET /query per ottenere informazioni sui brani."
+      }
+    },
+    "api-server": {
+      "description": "Aggiunge un server API per controllare il player",
+      "dialog": {
+        "request": {
+          "buttons": {
+            "allow": "Permetti",
+            "deny": "Nega"
+          },
+          "message": "Consentire a {{ID}} ({{origin}}) di accedere all'API?",
+          "title": "Autorizzazione API richiesta"
+        }
+      },
+      "menu": {
+        "auth-strategy": {
+          "label": "Metodo di autorizzazione",
+          "submenu": {
+            "auth-at-first": {
+              "label": "Autorizza alla prima richiesta"
+            },
+            "none": {
+              "label": "Nessuna autorizzazione"
+            }
+          }
+        },
+        "hostname": {
+          "label": "Hostname"
+        },
+        "port": {
+          "label": "Porta"
+        }
+      },
+      "name": "API Server [Beta]",
+      "prompt": {
+        "hostname": {
+          "label": "Inserisci il nome host (ad esempio 0.0.0.0) per il server API:",
+          "title": "Hostname"
+        },
+        "port": {
+          "label": "Inserisci la porta per il server API:",
+          "title": "Porta"
+        }
+      }
     },
     "audio-compressor": {
       "description": "Attiva la compressione audio (abbassa il volume delle parti più alte e alza quello delle parti più basse del segnale)",
@@ -410,6 +464,21 @@
       "description": "Download MP3 / sorgenti audio direttamente dall'interfaccia",
       "menu": {
         "choose-download-folder": "Scegli cartella download",
+        "download-finish-settings": {
+          "label": "Scarica al termine",
+          "prompt": {
+            "last-percent": "Dopo x percento",
+            "last-seconds": "Ultimi x secondi",
+            "title": "Configura quando scaricare"
+          },
+          "submenu": {
+            "advanced": "Avanzato",
+            "enabled": "Abilitato",
+            "mode": "Modalità tempo",
+            "percent": "Percentuale",
+            "seconds": "Secondi"
+          }
+        },
         "download-playlist": "Scarica la playlist",
         "presets": "Preimpostazioni",
         "skip-existing": "Salta i file esistenti"
@@ -421,6 +490,18 @@
       "templates": {
         "button": "Scarica"
       }
+    },
+    "equalizer": {
+      "description": "Aggiunge un equalizzatore al player",
+      "menu": {
+        "presets": {
+          "label": "Presets",
+          "list": {
+            "bass-booster": "Booster dei bassi"
+          }
+        }
+      },
+      "name": "Equalizzatore"
     },
     "exponential-volume": {
       "description": "Rende esponenziale il cursore del volume, in modo da facilitare la selezione di volumi più bassi.",
@@ -648,6 +729,59 @@
     "sponsorblock": {
       "description": "Salta automaticamente le parti non musicali, come l'intro/outro delle canzoni o le parti dei video musicali in cui non viene riprodotto il brano",
       "name": "Blocco sponsor"
+    },
+    "synced-lyrics": {
+      "description": "Fornisce testi sincronizzati alle canzoni, utilizzando provider come LRClib.",
+      "errors": {
+        "fetch": "⚠️ - Si è verificato un errore nel recuperare il testo. Per favore riprova più tardi.",
+        "not-found": "⚠️ - Nessun testo trovato per questa canzone."
+      },
+      "menu": {
+        "default-text-string": {
+          "label": "Carattere predefinito tra i testi",
+          "tooltip": "Scegliere il carattere predefinito da utilizzare per l'intervallo tra i testi"
+        },
+        "line-effect": {
+          "label": "Effetto linea",
+          "submenu": {
+            "focus": {
+              "label": "Focus",
+              "tooltip": "Rendi bianca solo la riga corrente"
+            },
+            "offset": {
+              "label": "Offset",
+              "tooltip": "Offset a destra della riga corrente"
+            },
+            "scale": {
+              "label": "Ingrandimento",
+              "tooltip": "Ingrandisci la linea corrente"
+            }
+          },
+          "tooltip": "Scegli l'effetto da applicare alla linea corrente"
+        },
+        "precise-timing": {
+          "label": "Rendi i testi perfettamente sincronizzati",
+          "tooltip": "Calcola al millisecondo la visualizzazione della riga successiva (può avere un piccolo impatto sulle prestazioni)"
+        },
+        "show-lyrics-even-if-inexact": {
+          "label": "Mostra le lyric anche se incorrette",
+          "tooltip": "Se il brano non viene trovato, il plugin riprova con un'altra query di ricerca.\nIl risultato del secondo tentativo potrebbe non essere esatto."
+        },
+        "show-time-codes": {
+          "label": "Mostra time code",
+          "tooltip": "Mostra i codici temporali accanto ai testi"
+        }
+      },
+      "name": "Testi sincronizzati",
+      "refetch-btn": {
+        "fetching": "Sto recuperando...",
+        "normal": "Recupera i testi"
+      },
+      "warnings": {
+        "duration-mismatch": "⚠️ - I testi potrebbero non essere sincronizzati a causa di una mancata corrispondenza della durata.",
+        "inexact": "⚠️ - Il testo di questa canzone potrebbe essere inesatto",
+        "instrumental": "⚠️ - Questo è un brano strumentale"
+      }
     },
     "taskbar-mediacontrol": {
       "description": "Controlla riproduzione dalla taskbar di Windows",

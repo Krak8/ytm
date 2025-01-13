@@ -207,6 +207,10 @@
     }
   },
   "plugins": {
+    "ad-speedup": {
+      "description": "Wenn eine Werbung spielt, stummt es das Audio und setzt die Wiedergabegeschwindigkeit auf 16x",
+      "name": "Werbungsbeschleunigung"
+    },
     "adblocker": {
       "description": "Blockiere jegliche Werbung und Tracker",
       "menu": {
@@ -274,6 +278,56 @@
         }
       },
       "name": "Ambiente-Modus"
+    },
+    "amuse": {
+      "description": "Fügt Unterstützung für das Amuse \"Spielt gerade\"-Widget von 6K Labs hinzu",
+      "name": "Amuse",
+      "response": {
+        "query": "Amuse API-Server läuft. /query für Liedinformationen."
+      }
+    },
+    "api-server": {
+      "description": "Fügt einen API-Server hinzu, um die Wiedergabe zu steuern",
+      "dialog": {
+        "request": {
+          "buttons": {
+            "allow": "Erlauben",
+            "deny": "Ablehnen"
+          },
+          "message": "{{ID}} ({{origin}}) den Zugriff zur API erlauben?",
+          "title": "API-Autorisierungs-Anfrage"
+        }
+      },
+      "menu": {
+        "auth-strategy": {
+          "label": "Autorisations-Methode",
+          "submenu": {
+            "auth-at-first": {
+              "label": "Beim ersten Zugriff autorisieren"
+            },
+            "none": {
+              "label": "Keine Autorisierung"
+            }
+          }
+        },
+        "hostname": {
+          "label": "Hostname"
+        },
+        "port": {
+          "label": "Port"
+        }
+      },
+      "name": "API-Server [Beta]",
+      "prompt": {
+        "hostname": {
+          "label": "Hostname des API-Servers vergeben (z. B. 0.0.0.0):",
+          "title": "Hostname"
+        },
+        "port": {
+          "label": "Port des API-Server:",
+          "title": "Port"
+        }
+      }
     },
     "audio-compressor": {
       "description": "Kompressor auf Audio anwenden (senkt die Lautstärke der lautesten Teile des Signals und hebt die Lautstärke der leisesten Teile an)",
@@ -410,6 +464,21 @@
       "description": "Lädt MP3-/Original-Audio direkt von der Schnittstelle herunter",
       "menu": {
         "choose-download-folder": "Downloadordner wählen",
+        "download-finish-settings": {
+          "label": "Song am Ende runterladen",
+          "prompt": {
+            "last-percent": "Nach x Prozent",
+            "last-seconds": "Letzten x Sekunden",
+            "title": "Konfiguriere wann runtergeladen werden soll"
+          },
+          "submenu": {
+            "advanced": "Erweitert",
+            "enabled": "Aktiviert",
+            "mode": "Zeitmodus",
+            "percent": "Prozent",
+            "seconds": "Sekunden"
+          }
+        },
         "download-playlist": "Wiedergabeliste herunterladen",
         "presets": "Voreinstellungen",
         "skip-existing": "Vorhandene Dateien überspringen"
@@ -421,6 +490,18 @@
       "templates": {
         "button": "Herunterladen"
       }
+    },
+    "equalizer": {
+      "description": "Fügt einen Equalizer zum Player hinzu",
+      "menu": {
+        "presets": {
+          "label": "Vorgaben",
+          "list": {
+            "bass-booster": "Bass-Verstärker"
+          }
+        }
+      },
+      "name": "Equalizer"
     },
     "exponential-volume": {
       "description": "Macht den Lautstärkeregler exponentiell, damit es einfacher ist leise Lautstärken zu wählen.",
@@ -648,6 +729,63 @@
     "sponsorblock": {
       "description": "Überspringt automatisch nicht-musikalische Teile wie Intro/Outro oder Teile von Musikvideos, in denen der Song nicht gespielt wird",
       "name": "SponsorBlock"
+    },
+    "synced-lyrics": {
+      "description": "Bietet synchronisierte Liedtexte zu Songs, verwendet Anbieter wie LRClib.",
+      "errors": {
+        "fetch": "⚠️ - \tBeim Abrufen des Liedtexts ist ein Fehler aufgetreten. \n\tBitte versuchen Sie es später nochmal.",
+        "not-found": "⚠️ Kein Text für diesen Song gefunden."
+      },
+      "menu": {
+        "default-text-string": {
+          "label": "Standardzeichen zwischen Texten",
+          "tooltip": "Standardzeichen für die Lücke zwischen Songtexten auswählen"
+        },
+        "line-effect": {
+          "label": "Zeileneffekt",
+          "submenu": {
+            "fancy": {
+              "label": "schick",
+              "tooltip": "Verwende große, app-ähnliche Effekte in der aktuellen Zeile"
+            },
+            "focus": {
+              "label": "Fokussieren",
+              "tooltip": "Nur aktive Zeile weiß darstellen"
+            },
+            "offset": {
+              "label": "Versatz",
+              "tooltip": "Verschiebe die aktuelle Zeile nach rechts"
+            },
+            "scale": {
+              "label": "Skalieren",
+              "tooltip": "Aktuelle Zeile skalieren"
+            }
+          },
+          "tooltip": "Effekt für aktive Zeile auswählen"
+        },
+        "precise-timing": {
+          "label": "Den Songtext perfekt synchronisieren",
+          "tooltip": "Auf die Millisekunde genau berechnen, wann die nächste Zeile angezeigt werden soll (Kann Einfluss auf die Leistung haben)"
+        },
+        "show-lyrics-even-if-inexact": {
+          "label": "Zeige die Liedtexte, auch wenn sie ungenau sind.",
+          "tooltip": "Die Erweiterung sucht mit anderen Suchparameter nochmals, wenn der Song nicht gefunden wurde.\nEs kann sein, dass das Ergebnis von der zweiten Anfrage nicht genau ist."
+        },
+        "show-time-codes": {
+          "label": "Zeitkodierungen anzeigen",
+          "tooltip": "Zeitkodierungen neben Songtext anzeigen"
+        }
+      },
+      "name": "Synchronisierte Texte",
+      "refetch-btn": {
+        "fetching": "Hole Songtext...",
+        "normal": "Songtext neu holen"
+      },
+      "warnings": {
+        "duration-mismatch": "⚠️ - Es kann sein, dass die Synchronization nicht stimmt, da die Songdauer nicht übereinstimmt.",
+        "inexact": "⚠️ - Es ist Möglich, dass der Songtext für diesen Song nicht übereinstimmt.",
+        "instrumental": "⚠️ - Das ist ein instrumentales Lied"
+      }
     },
     "taskbar-mediacontrol": {
       "description": "Wiedergabe aus der Windows Taskleiste kontrollieren",

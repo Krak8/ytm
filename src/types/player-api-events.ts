@@ -1,3 +1,5 @@
+import type { WatchNextResponse } from '@/types/youtube-music-desktop-internal';
+
 export interface AlbumDetails {
   responseContext: ResponseContext;
   contents: Contents;
@@ -241,6 +243,7 @@ export interface FlagEndpoint {
   flagAction: string;
 }
 
+// see song-info-front.ts
 export type VideoDataChangeValue = Record<string, unknown> & {
   videoId: string;
   title: string;
@@ -251,6 +254,11 @@ export type VideoDataChangeValue = Record<string, unknown> & {
   loading: boolean;
 
   lengthSeconds: number;
+
+  /**
+   * YouTube Music Desktop internal variable (for album data)
+   **/
+  ytmdWatchNextResponse?: WatchNextResponse;
 };
 
 export interface PlayerAPIEvents {
